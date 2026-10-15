@@ -1,0 +1,887 @@
+<title>ProofQuarry Motion Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+/* Layout: background hero first, then one live example per motion — stage, numbers, Replay, CSS. Dark only, like the site. */
+:root{
+  color-scheme: dark;
+  --bg:#0E121C; --bg-deep:#0A0D15; --surface:#131828; --surface-2:#1A2035;
+  --fg:#FFFFFF; --soft:#C9C8D5; --muted:#9598AB; --faint:#6A6D85;
+  --accent:#E9FE85; --accent-hover:#EDFE9D;
+  --hairline:rgba(67,73,98,.38); --hairline-strong:rgba(106,109,133,.55);
+  --sans:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --ease:cubic-bezier(.2,.7,.2,1); --t-fast:150ms; --t-slow:700ms;
+  --r-btn:8px; --r-sm:12px; --r-lg:20px; --r-pill:128px;
+}
+@media (prefers-reduced-motion:reduce){:root{--t-fast:0ms;--t-slow:0ms}}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1280px;margin-inline:auto;padding-inline:max(16px,4vw)}
+h1,h2,h3{font-weight:500;letter-spacing:-.02em;text-wrap:balance;margin:0}
+p{margin:0;text-wrap:pretty}
+button{font:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* shared atoms */
+.btn{white-space:nowrap;text-decoration:none;font:500 14px/1 var(--mono);letter-spacing:.02em;border-radius:var(--r-btn);height:37px;padding:0 16px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px solid transparent;transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
+.morph{width:16px;height:16px;flex:none;overflow:visible;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.morph .shaft{stroke-linecap:butt;stroke-dasharray:1;stroke-dashoffset:1;opacity:0;transition:stroke-dashoffset 220ms var(--ease),opacity 0s linear 220ms}
+.morph .head{transition:transform 220ms var(--ease)}
+@media (hover:hover){
+  .btn:hover .morph .shaft{stroke-dashoffset:0;opacity:1;transition:stroke-dashoffset 220ms var(--ease),opacity 0s}
+  .btn:hover .morph .head{transform:translateX(2px)}
+}
+.primary{background:var(--accent);color:var(--bg)}
+.primary:hover{background:var(--accent-hover)}
+.secondary{background:transparent;color:var(--fg);border-color:var(--hairline-strong)}
+.secondary:hover{background:var(--surface-2);border-color:var(--faint)}
+.btn.is-disabled,.btn.is-disabled:hover{opacity:.45;background:transparent;border-color:var(--hairline-strong);cursor:default;pointer-events:none}
+.ghost{background:transparent;color:var(--fg);border-color:var(--hairline-strong);height:32px;padding:0 12px;font-size:12px}
+.ghost:hover{background:var(--surface-2)}
+.kicker{font:400 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:var(--surface-2);border:1px solid rgba(233,254,133,.35);border-radius:var(--r-pill);padding:8px 12px;display:inline-block}
+.mono-label{font:400 12px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+
+
+/* layout with fixed side menu */
+.layout{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100%}
+.side{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:28px 24px 24px;border-right:1px solid var(--hairline);background:var(--bg);display:flex;flex-direction:column;gap:28px;z-index:6}
+.side-brand{font-weight:500;font-size:17px;letter-spacing:-.01em;display:flex;flex-direction:column;gap:4px}
+.side-brand small{font:400 12px/1 var(--mono);color:var(--muted);letter-spacing:.04em}
+.side-nav{display:flex;flex-direction:column;gap:24px}
+.grp{display:flex;flex-direction:column;gap:2px}
+.grp b{font-weight:500;font-size:14px;color:var(--fg);margin-bottom:6px}
+.grp a{font-size:14px;color:var(--muted);text-decoration:none;padding:6px 10px;margin-inline:-10px;border-radius:8px;transition:color var(--t-fast) var(--ease),background var(--t-fast) var(--ease)}
+.grp a:hover{color:var(--fg)}
+.grp a[aria-current="true"]{color:var(--fg);background:rgba(26,32,53,.6)}
+.side-toggle{margin-top:auto;align-self:flex-start}
+.main{min-width:0}
+.main .wrap{max-width:1120px}
+.tokens{margin-top:24px;border-top:1px solid var(--hairline)}
+.tokens div{display:grid;grid-template-columns:120px 220px minmax(0,1fr);gap:16px;padding:10px 0;border-bottom:1px solid var(--hairline);font:400 13px/1.4 var(--mono);color:var(--soft)}
+.tokens div span:first-child{color:var(--accent)}
+.tokens div span:last-child{color:var(--muted);font-family:var(--sans);font-size:14px}
+html{scroll-padding-top:16px}
+@media (max-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .side{position:sticky;top:0;height:auto;flex-direction:row;align-items:center;gap:12px;padding:10px 16px;border-right:0;border-bottom:1px solid var(--hairline);overflow-x:auto;overflow-y:hidden}
+  .side-brand,.side-toggle{display:none}
+  .side-nav{flex-direction:row;gap:4px}
+  .grp{flex-direction:row;gap:4px}
+  .grp b{display:none}
+  .grp a{white-space:nowrap;margin:0;font-size:13px}
+  html{scroll-padding-top:64px}
+  .tokens div{grid-template-columns:minmax(0,1fr);gap:4px}
+}
+
+/* top bar */
+.bar{position:absolute;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:5}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px}
+.brand{font-weight:500;font-size:18px;letter-spacing:-.01em}
+.brand small{font:400 12px/1 var(--mono);color:var(--muted);margin-left:12px;letter-spacing:.04em}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+#toggle[aria-pressed="true"] .dot{background:var(--faint)}
+
+/* background field */
+.field{position:relative;overflow:hidden;isolation:isolate}
+.field canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:-1}
+.field.fallback{background:radial-gradient(60% 50% at 95% 15%,rgba(92,122,82,.55),transparent 70%),radial-gradient(55% 45% at 5% 40%,rgba(44,84,86,.55),transparent 70%),linear-gradient(#080B12,#0E121C)}
+.hero{min-height:560px;display:flex;align-items:center;padding-block:96px 96px}
+.hero .wrap{display:flex;flex-direction:column;align-items:center;text-align:center;gap:24px}
+.hero h1{font-size:clamp(40px,6.2vw,72px);line-height:1;max-width:14ch}
+.hero p{color:var(--muted);font-size:clamp(16px,1.6vw,20px);line-height:1.45;max-width:46ch}
+
+/* index */
+.index{padding-block:48px 8px}
+.index h2{font-size:clamp(28px,3.4vw,40px);line-height:1.1;margin-bottom:12px}
+.index > .wrap > p{color:var(--muted);max-width:62ch;margin-bottom:24px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips a{font:400 13px/1 var(--mono);color:var(--soft);text-decoration:none;border:1px solid var(--hairline-strong);border-radius:var(--r-pill);padding:9px 14px;transition:background var(--t-fast) var(--ease)}
+.chips a:hover{background:var(--surface-2)}
+.rules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:32px}
+.rules div{border-top:1px solid var(--hairline);padding-top:12px;color:var(--soft);font-size:14px}
+.rules b{display:block;font:400 12px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;font-weight:400}
+
+/* example block */
+.ex{padding-block:64px 8px;scroll-margin-top:24px}
+.ex-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px}
+.ex-head h2{font-size:clamp(24px,2.6vw,32px);line-height:1.1}
+.ex-head p{color:var(--muted);margin-top:8px;max-width:62ch}
+.specs{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.specs span{font:400 12px/1 var(--mono);color:var(--soft);background:var(--surface-2);border-radius:6px;padding:6px 8px}
+.stage{border:1px solid var(--hairline);border-radius:var(--r-lg);background:var(--bg-deep);padding:clamp(20px,4vw,48px);min-height:200px;position:relative;overflow:hidden}
+details{margin-top:12px;border:1px solid var(--hairline);border-radius:var(--r-sm)}
+summary{cursor:pointer;padding:12px 16px;font:400 13px/1 var(--mono);color:var(--muted)}
+details pre{margin:0;padding:0 16px 16px;font:400 12px/1.7 var(--mono);color:var(--soft);overflow-x:auto;white-space:pre}
+
+/* panels */
+.prow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.panel{--p:.2;position:relative;border-radius:var(--r-lg);border:1px solid transparent;
+  background:linear-gradient(180deg,var(--surface) 0 40%,var(--bg)) padding-box,linear-gradient(180deg,rgba(255,255,255,.10) 0 50%,rgba(255,255,255,.05)) border-box;
+  padding:24px;min-width:0;isolation:isolate}
+.panel::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(180deg,transparent calc(var(--p)*100% - 35%),rgba(201,200,213,.2) calc(var(--p)*100%),transparent calc(var(--p)*100% + 35%));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+.panel.term{border-radius:var(--r-sm);padding:0;background:linear-gradient(180deg,var(--bg-deep) 0 40%,var(--bg)) padding-box,linear-gradient(180deg,rgba(255,255,255,.10) 0 50%,rgba(255,255,255,.05)) border-box}
+.tbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--hairline);font:400 12px/1 var(--mono);letter-spacing:.12em;color:var(--faint)}
+.tbar i{width:6px;height:6px;border-radius:50%;background:var(--faint);opacity:.6}
+.term pre{margin:0;padding:16px 20px 20px;font:400 12px/1.8 var(--mono);color:var(--soft);white-space:pre;overflow-x:auto;min-height:1.8em}
+.ok{color:var(--accent)}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:12px;padding:10px 8px;margin-inline:-8px;border-bottom:1px solid var(--hairline);font:400 13px/1.4 var(--mono);border-radius:6px;transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
+.kv span:first-child{color:var(--faint)}.kv span:last-child{color:var(--soft)}
+.kv.lit span:last-child{color:var(--accent)}
+.rows .kv:hover{background:rgba(26,32,53,.4);border-bottom-color:rgba(106,109,133,.4)}
+
+/* hero load scene */
+.load{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:center}
+.load .copy{display:flex;flex-direction:column;gap:16px;align-items:flex-start}
+.load h3{font-size:clamp(28px,3.2vw,40px);line-height:1.05;max-width:12ch}
+.load .copy p{color:var(--muted);font-size:15px;max-width:40ch}
+.load .acts{display:flex;gap:8px;flex-wrap:wrap}
+.step{opacity:0;transform:translateY(16px);filter:blur(6px)}
+.in .step{opacity:1;transform:none;filter:none;transition:opacity var(--t-slow) var(--ease),transform var(--t-slow) var(--ease),filter var(--t-slow) var(--ease);transition-delay:calc(var(--i)*90ms)}
+.window{position:relative;border-radius:var(--r-lg)}
+.edge{position:absolute;left:0;right:0;top:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--accent) 30% 70%,transparent);box-shadow:0 0 24px rgba(233,254,133,.35);transform:scaleX(0);transform-origin:50% 50%}
+.in .edge{transform:scaleX(1);transition:transform var(--t-slow) var(--ease) .55s}
+.tag{display:inline-flex;align-items:center;gap:8px;font:400 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;padding:7px 10px;border-radius:var(--r-pill);border:1px solid var(--hairline-strong);color:var(--muted)}
+.tag.ok2{color:var(--accent);border-color:rgba(233,254,133,.35)}
+.tag .spin{width:10px;height:10px;border:1.5px solid var(--faint);border-top-color:transparent;border-radius:50%;animation:spin 900ms linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.typer{height:calc(3 * 1.8em + 36px);overflow:hidden}
+.checks{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.checks div{display:flex;gap:10px;font-size:13px;color:var(--soft);opacity:0;transform:translateY(8px);transition:opacity 400ms var(--ease),transform 400ms var(--ease)}
+.checks div.on{opacity:1;transform:none}
+.checks svg{flex:none;margin-top:3px}
+
+/* timeline */
+.tl{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;padding-top:28px}
+.tl .line{position:absolute;top:6px;left:0;height:1px;width:100%;background:var(--hairline)}
+.tl .line i{position:absolute;inset:0;background:var(--accent);transform:scaleX(0);transform-origin:0 50%;box-shadow:0 0 12px rgba(233,254,133,.35)}
+
+.node{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0}
+.node::before{content:"";position:absolute;top:-27px;left:0;width:9px;height:9px;border-radius:50%;background:var(--surface-2);border:1px solid var(--hairline-strong);transition:background 300ms var(--ease),box-shadow 300ms var(--ease),border-color 300ms var(--ease)}
+.node.lit::before{background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px rgba(233,254,133,.5)}
+.node h3{font-size:20px;line-height:1.2}
+.node p{color:var(--muted);font-size:14px}
+.node code{font:400 12px/1.4 var(--mono);color:var(--soft)}
+
+
+/* timeline: desktop reveal + mobile pinned horizontal */
+.label-row{margin:0 0 8px}
+.tl .node > *{opacity:0;transform:translateY(10px);filter:blur(6px);transition:opacity 600ms var(--ease),transform 600ms var(--ease),filter 600ms var(--ease)}
+.tl .node > :nth-child(2){transition-delay:60ms}.tl .node > :nth-child(3){transition-delay:120ms}.tl .node > :nth-child(4){transition-delay:180ms}
+.tl .node.lit > *{opacity:1;transform:none;filter:none}
+.phone2{width:min(375px,100%);height:600px;border-radius:28px;border:1px solid var(--hairline-strong);overflow-y:auto;overflow-x:hidden;background:var(--bg);position:relative;overscroll-behavior:contain}
+.ph-intro{padding:40px 20px 32px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.ph-intro h3{font-size:26px;line-height:1.1}
+.hint{font:400 12px/1 var(--mono);color:var(--faint);letter-spacing:.04em}
+.pin{position:relative}
+.pin-inner{position:sticky;top:0;height:600px;overflow:hidden;display:flex;align-items:center}
+.tl2{position:relative;width:100%;padding:28px 0 0}
+.track{position:relative;display:flex;gap:24px;padding:0 20px;will-change:transform}
+.track .line{position:absolute;top:-23px;left:24.5px;height:1px;background:var(--hairline)}
+.track .line i{position:absolute;inset:0;background:var(--accent);transform:scaleX(var(--fill,0));transform-origin:0 50%;box-shadow:0 0 12px rgba(233,254,133,.35)}
+.track .node{flex:0 0 260px}
+.track .node > *{will-change:opacity,transform,filter}
+.ph-outro{padding:32px 20px 200px;color:var(--muted);font-size:14px}
+
+/* reveal */
+.rgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.rcard{border:1px solid var(--hairline);border-radius:var(--r-lg);padding:20px;background:var(--surface);opacity:0;transform:translateY(16px);filter:blur(6px)}
+.rgrid.in .rcard{opacity:1;transform:none;filter:none;transition:opacity var(--t-slow) var(--ease),transform var(--t-slow) var(--ease),filter var(--t-slow) var(--ease);transition-delay:calc(var(--i)*90ms)}
+.rcard .box{width:40px;height:40px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;margin-bottom:16px}
+.rcard h3{font-size:18px;margin-bottom:6px}
+.rcard p{color:var(--muted);font-size:14px}
+
+
+/* desktop header links */
+.dnav{display:flex;align-items:center;justify-content:space-between;gap:24px;height:72px;padding:0 32px;border-radius:var(--r-lg)}
+.dlinks{display:flex;gap:4px}
+.dlinks a,.dlogin{font:400 14px/1 var(--mono);color:var(--muted);text-decoration:none;padding:9px 12px;border-radius:var(--r-pill);transition:color var(--t-fast) var(--ease),background var(--t-fast) var(--ease)}
+.dlinks a:hover,.dlogin:hover{color:var(--fg);background:rgba(26,32,53,.6)}
+.dlinks a[aria-current="page"]{color:var(--fg)}
+.dlinks a[aria-current="page"]:hover{background:transparent}
+.dact{display:flex;align-items:center;gap:8px}
+@media (max-width:900px){.dlinks{display:none}}
+
+/* header on scroll */
+.scrollbox{height:380px;overflow-y:auto;border-radius:var(--r-sm);border:1px solid var(--hairline);position:relative;background:var(--bg)}
+.mhead{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;height:60px;padding:0 20px;border-bottom:1px solid transparent;transition:background var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease),backdrop-filter var(--t-fast) var(--ease)}
+.mhead.scrolled{background:rgba(14,18,28,.72);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);border-bottom-color:var(--hairline)}
+.mhead nav{display:flex;gap:16px;font:400 13px/1 var(--mono);color:var(--muted)}
+.minihead{min-height:300px;margin-top:-60px;padding:104px 24px 40px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.minihead h3{font-size:clamp(24px,3vw,36px);line-height:1.1;max-width:16ch}
+.minihead p{color:var(--muted);font-size:14px;max-width:52ch}
+.filler{padding:8px 24px 48px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.filler .panel{padding:20px}
+.filler .panel h4{font-weight:500;font-size:17px;margin:0 0 8px;letter-spacing:-.01em}
+.filler .panel p{color:var(--muted);font-size:14px}
+.filler .rows{grid-column:1/-1}
+.hact{display:flex;align-items:center;gap:12px}
+.state{display:inline-flex;align-items:center;gap:8px;font:400 12px/1 var(--mono);color:var(--soft);background:var(--surface-2);border-radius:6px;padding:7px 10px;margin-bottom:12px}
+.state-dot{width:6px;height:6px;border-radius:50%;background:var(--faint);transition:background var(--t-fast) var(--ease)}
+.state.on .state-dot{background:var(--accent)}
+@media (max-width:760px){.filler{grid-template-columns:minmax(0,1fr)}.hact span:first-child{display:none}}
+
+/* phone: menu */
+.phone{width:min(375px,100%);height:560px;margin-inline:auto;border-radius:28px;border:1px solid var(--hairline-strong);overflow:hidden;position:relative;background:var(--bg)}
+.phone .mhead{position:absolute;left:0;right:0;top:0;z-index:3}
+.burger{width:28px;height:24px;background:none;border:0;cursor:pointer;position:relative;padding:0;color:var(--fg)}
+.burger svg{position:absolute;inset:0;transition:opacity var(--t-fast) var(--ease)}
+.burger .x{opacity:0}
+.phone.open .burger .bars{opacity:0}.phone.open .burger .x{opacity:1}
+.sheet{position:absolute;inset:0;z-index:2;background:var(--bg);padding:96px 20px 24px;display:flex;flex-direction:column;justify-content:space-between;opacity:0;visibility:hidden;transition:opacity var(--t-fast) var(--ease),visibility 0s linear var(--t-fast)}
+.phone.open .sheet{opacity:1;visibility:visible;transition:opacity var(--t-fast) var(--ease)}
+.sheet ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.sheet li{font-size:28px;font-weight:500;letter-spacing:-.02em;padding-block:12px;border-bottom:1px solid var(--hairline)}
+.sheet .acts{display:flex;gap:8px}
+.sheet .acts .btn{flex:1;justify-content:center;height:40px}
+.phone .minihead{margin-top:0;padding-top:96px}
+
+/* modal */
+.backdrop{position:absolute;inset:0;background:rgba(5,7,12,.6);display:grid;place-items:center;opacity:0;visibility:hidden;transition:opacity var(--t-fast) var(--ease),visibility 0s linear var(--t-fast);z-index:4;padding:16px}
+.backdrop.open{opacity:1;visibility:visible;transition:opacity var(--t-fast) var(--ease)}
+.modal{width:min(420px,100%);background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:24px;box-shadow:0 40px 80px -30px rgba(0,0,0,.75);transform:translateY(8px) scale(.98);transition:transform var(--t-fast) var(--ease);position:relative}
+.backdrop.open .modal{transform:none}
+.modal h3{font-size:24px;margin:8px 0 8px;text-align:center}
+.modal .mbody{text-align:center;color:var(--muted);font-size:14px}
+.gbtn{gap:10px}
+.mrule{border:0;border-top:1px solid var(--hairline);margin:20px 0 0}
+.modal .fine a{color:var(--link);text-decoration:none}
+
+.modal .fine{font:400 12px/1.6 var(--mono);color:var(--faint);margin-top:16px}
+.modal .close{position:absolute;top:16px;right:16px;background:none;border:0;color:var(--muted);cursor:pointer;padding:4px}
+.modal .btn{width:100%;justify-content:center;margin-top:20px}
+.modal-stage{min-height:420px;display:grid;place-items:center}
+
+
+
+/* footer wordmark glow */
+@property --glow{syntax:'<number>';inherits:true;initial-value:0}
+.ftr{background:#000;border-radius:var(--r-lg);border:1px solid var(--hairline);overflow:hidden}
+.ftr-svg{display:block;width:100%;height:auto}
+#wmLight{opacity:0;transition:opacity 400ms var(--ease)}
+.ftr:hover #wmLight{opacity:1}
+@media (hover:none){.ftr:hover #wmLight{opacity:0}}
+.ftr-top{display:grid;grid-template-columns:1.3fr repeat(4,minmax(0,1fr));gap:24px}
+.ftr-tag{font:400 13px/1.6 var(--mono);color:var(--muted)}
+.ftr-col{display:flex;flex-direction:column;gap:10px;font:400 13px/1.3 var(--mono);color:var(--soft)}
+.ftr-col b{font-weight:400;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.wordmark{--x:50%;--y:50%;display:block;width:100%;font:500 120px/1 var(--sans);letter-spacing:-.04em;margin:40px 0 24px;white-space:nowrap;overflow:visible;user-select:none;
+  color:transparent;-webkit-background-clip:text;background-clip:text;
+  background:radial-gradient(260px circle at var(--x) var(--y),rgba(233,254,133,calc(.30*var(--glow))) 0%,rgba(80,110,78,calc(.55*var(--glow))) 35%,rgba(40,47,70,0) 70%),#282F46;
+  -webkit-background-clip:text;background-clip:text;transition:--glow 400ms var(--ease)}
+.ftr:hover .wordmark{--glow:1}
+.ftr-legal{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:1px solid var(--hairline);padding-top:20px;font:400 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+@media (max-width:900px){.ftr-top{grid-template-columns:repeat(2,minmax(0,1fr))}.ftr-tag{grid-column:1/-1}}
+@media (hover:none){.ftr:hover .wordmark{--glow:0}}
+
+/* search field */
+.sfield{display:flex;align-items:center;gap:10px;height:40px;padding:0 10px 0 14px;border:1px solid var(--hairline-strong);border-radius:8px;width:min(360px,100%);color:var(--muted);cursor:text;transition:border-color var(--t-fast) var(--ease)}
+.sfield:hover{border-color:var(--faint)}
+.sfield:focus-within{border-color:var(--muted)}
+.sfield input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--fg);font:400 14px/1.4 var(--sans);caret-color:var(--accent);-webkit-appearance:none;appearance:none}
+.sfield input::placeholder{color:var(--muted)}
+.sfield input::-webkit-search-cancel-button{display:none}
+.kbd{font:400 12px/1 var(--mono);color:var(--faint);border:1px solid var(--hairline-strong);border-radius:4px;padding:3px 7px;transition:opacity var(--t-fast) var(--ease)}
+.sfield:focus-within .kbd,.sfield.has .kbd{opacity:0}
+.sclear{background:none;border:0;padding:2px;color:var(--muted);cursor:pointer;display:inline-flex;opacity:0;pointer-events:none;transition:opacity var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
+.sfield.has .sclear{opacity:1;pointer-events:auto}
+.sclear:hover{color:var(--fg)}
+.sfield.has .kbd{display:none}
+.sfield:not(.has) .sclear{width:0;padding:0;overflow:hidden}
+
+/* tooltip */
+.tipwrap{display:flex;align-items:center;gap:8px;position:relative;width:max-content;max-width:100%}
+.tipbtn{background:none;border:0;color:var(--faint);cursor:pointer;padding:2px;display:inline-flex;transition:color var(--t-fast) var(--ease)}
+.tipwrap:hover .tipbtn,.tipwrap.open .tipbtn{color:var(--accent)}
+.tip{position:absolute;left:0;bottom:calc(100% + 8px);width:311px;max-width:80vw;background:var(--surface-2);border:1px solid var(--hairline-strong);border-radius:8px;padding:12px 16px;font-size:14px;color:var(--soft);box-shadow:0 16px 40px rgba(0,0,0,.45);opacity:0;transform:translateY(4px);pointer-events:none;transition:opacity var(--t-fast) var(--ease),transform var(--t-fast) var(--ease)}
+.tipwrap:hover .tip,.tipwrap.open .tip{opacity:1;transform:none}
+.tip-stage{padding-top:120px}
+
+.inner{padding-block:64px 24px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.head{border-radius:var(--r-lg);border:1px solid var(--hairline);min-height:240px;padding:24px;display:flex;flex-direction:column;justify-content:flex-end;gap:12px}
+.head h3{font-size:clamp(20px,2vw,26px);line-height:1.1;max-width:18ch}
+.head .kicker{align-self:flex-start}
+.cap{display:flex;justify-content:space-between;gap:12px;font:400 12px/1.4 var(--mono);color:var(--faint);letter-spacing:.04em;margin-top:8px}
+.note{border-top:1px solid var(--hairline);margin-top:64px;padding-block:24px 48px;color:var(--faint);font:400 12px/1.6 var(--mono);letter-spacing:.04em}
+
+@media (max-width:900px){
+  .prow,.rgrid,.grid,.rules,.load{grid-template-columns:minmax(0,1fr)}
+  .tl{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:40px}
+  .mhead nav{display:none}
+}
+@media (max-width:760px){ .hero{min-height:520px;padding-block:112px 72px} .bar .wrap{height:60px} .brand small{display:none} }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="chev" viewBox="0 0 16 16"><polyline points="6,3.5 10.5,8 6,12.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="arrow" viewBox="0 0 16 16"><path d="M2.5 8h10.5M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="check" viewBox="0 0 16 16"><polyline points="3,8.5 6.5,12 13,4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+
+
+<div class="layout">
+<aside class="side" aria-label="Motion guide">
+  <div class="side-brand">ProofQuarry<small>Motion guide</small></div>
+  <nav class="side-nav">
+    <div class="grp"><b>Overview</b><a href="#principles">Principles</a><a href="#tokens">Durations and curve</a></div>
+    <div class="grp"><b>Scenes</b><a href="#background">Background</a><a href="#hero-load">Hero load</a><a href="#timeline">Timeline</a></div>
+    <div class="grp"><b>Interface</b><a href="#reveal">Reveal on scroll</a><a href="#panels">Panel edges</a><a href="#buttons">Buttons</a><a href="#rows">Rows</a><a href="#nav-links">Header links</a><a href="#header">Header on scroll</a><a href="#menu">Menu</a><a href="#footer-glow">Footer wordmark</a><a href="#search">Search field</a><a href="#modal">Modal</a><a href="#tooltip">Tooltip</a></div>
+    <div class="grp"><b>Pages</b><a href="#pages">Inner page backgrounds</a></div>
+  </nav>
+  <button class="btn secondary side-toggle" id="toggle" type="button" aria-pressed="false"><span class="dot" aria-hidden="true"></span><span id="toggleLabel">Pause</span></button>
+</aside>
+<main class="main">
+<section class="field hero" id="background" data-preset="full" data-seed="17">
+  <canvas aria-hidden="true"></canvas>
+  <div class="wrap">
+    <span class="kicker">Home · Full</span>
+    <h1>Prove where your content came from</h1>
+    <p>Cryptographic signatures for documents. Sign with one API call — anyone can verify offline, on any machine, years later.</p>
+  </div>
+</section>
+
+<section class="index" id="principles">
+  <div class="wrap">
+    <div class="rules">
+      <div><b>Three scenes</b>Hero load, the timeline and the background move. Everything else only fades in once.</div>
+      <div><b>Only transform, opacity, blur</b>Nothing that changes layout. Two durations: 150 ms and 700 ms, one curve.</div>
+      <div><b>Reduced motion</b>If the visitor turns motion off, everything shows its final state.</div>
+    </div>
+    <div class="tokens" id="tokens">
+      <div><span>--t-fast</span><span>150 ms</span><span>hover, press, header, menu, modal, tooltip</span></div>
+      <div><span>--t-slow</span><span>700 ms</span><span>reveal, hero steps, step text</span></div>
+      <div><span>--ease</span><span>cubic-bezier(.2, .7, .2, 1)</span><span>everything</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="ex" id="hero-load"><div class="wrap">
+  <div class="ex-head"><div><h2>Hero load</h2><p>On page load the text rises step by step, then the lime edge of the window lights up and the terminal signs the file.</p>
+    <div class="specs"><span>text: 700 ms each</span><span>90 ms apart</span><span>rise 16 px</span><span>edge: scaleX 0 → 1</span><span>typing ~28 ms / char</span><span>once</span></div></div>
+    <button class="btn ghost" data-replay="hero-load">Replay</button></div>
+  <div class="stage"><div class="load" id="loadScene">
+    <div class="copy">
+      <span class="kicker step" style="--i:0">Home</span>
+      <h3 class="step" style="--i:1">Prove where your content came from</h3>
+      <p class="step" style="--i:2">Cryptographic signatures for documents. Sign with one API call — anyone can verify offline, on any machine, years later.</p>
+      <div class="acts step" style="--i:3"><a class="btn primary" href="#modal">Start free <svg class="morph" viewBox="0 0 16 16" aria-hidden="true"><path class="shaft" d="M13 8H2.5" pathLength="1"/><polyline class="head" points="6.5,3.5 11,8 6.5,12.5"/></svg></a><a class="btn secondary" href="#hero-load">Read the docs <svg class="morph" viewBox="0 0 16 16" aria-hidden="true"><path class="shaft" d="M13 8H2.5" pathLength="1"/><polyline class="head" points="6.5,3.5 11,8 6.5,12.5"/></svg></a></div>
+    </div>
+    <div class="window step" style="--i:4">
+      <div class="panel term"><span class="edge" aria-hidden="true"></span>
+        <div class="tbar"><i></i><i></i><i></i><span>SIGNING</span></div>
+        <pre id="typer" class="typer"></pre>
+        <div style="padding:0 20px 20px"><span class="tag" id="vtag"><span class="spin"></span>Checking</span>
+          <div class="checks" id="vchecks">
+            <div><svg width="14" height="14" class="ok"><use href="#check"/></svg>Digest matches the signed statement.</div>
+            <div><svg width="14" height="14" class="ok"><use href="#check"/></svg>Signature valid over the signed bytes.</div>
+            <div><svg width="14" height="14" class="ok"><use href="#check"/></svg>Chain verified to the published root.</div>
+          </div></div>
+      </div>
+    </div>
+  </div></div>
+  <details><summary>CSS + JS</summary><pre>.step { opacity:0; transform:translateY(16px); filter:blur(6px); }
+.in .step { opacity:1; transform:none; filter:none;
+  transition: opacity var(--t-slow) var(--ease), transform var(--t-slow) var(--ease), filter var(--t-slow) var(--ease);
+  transition-delay: calc(var(--i) * 90ms); }      /* --i = 0,1,2,3,4 in order */
+
+.edge { transform:scaleX(0); transform-origin:50% 50%; }
+.in .edge { transform:scaleX(1); transition: transform var(--t-slow) var(--ease) .55s; }
+
+/* JS: add .in to the hero on load; then type each terminal line
+   (~28 ms per character), then switch the tag Checking → Verified
+   and show the three checks 250 ms apart. */</pre></details>
+</div></section>
+
+<section class="ex" id="timeline"><div class="wrap">
+  <div class="ex-head"><div><h2>Timeline</h2><p>Desktop: when the block comes into view the line draws from left to right; each step lights up and its text appears as the line reaches it.</p>
+    <div class="specs"><span>line 2400 ms · ease-in-out</span><span>dot lights when the line reaches it</span><span>its text starts at the same moment</span><span>text 600 ms · 60 ms apart</span><span>once</span></div></div>
+    <button class="btn ghost" data-replay="timeline">Replay</button></div>
+  <div class="label-row"><span class="mono-label">Desktop</span></div>
+  <div class="stage"><div class="tl" id="tl">
+    <div class="line"><i></i></div>
+    <div class="node"><span class="mono-label">Today</span><h3>Signed</h3><p>One API call. The file is hashed locally; the signature and its certificate chain land in a statement file beside it.</p><code>contract.pdf.pq.json</code></div>
+    <div class="node"><span class="mono-label">Whenever it moves</span><h3>Shared</h3><p>Email them, commit them, drop them in cold storage. The pair travels together; nothing else is needed.</p><code>no account to open</code></div>
+    <div class="node"><span class="mono-label">If we are down · or gone</span><h3>Still verifiable</h3><p>Verification runs against a published root compiled into the SDK. It works when ProofQuarry is down, and if ProofQuarry is gone.</p><code>no network call</code></div>
+    <div class="node"><span class="mono-label">Years later</span><h3>Verified on any machine</h3><p>A borrowed laptop, openssl and a shell script are enough. The file either matches what was signed, or it doesn’t.</p><code>exit 0 · verified</code></div>
+  </div></div>
+
+  <div class="ex-head" style="margin-top:48px"><div><h3 style="font-size:22px">Tablet and mobile</h3><p>The block stays on screen while you scroll: scroll down and the steps slide to the left so the next one comes in from the right; scroll up and they slide back. The line fills with the scroll. Scroll inside the phone.</p>
+    <div class="specs"><span>tied to scroll</span><span>block pinned</span><span>swipe works too</span></div></div></div>
+  <div class="label-row"><span class="mono-label">Mobile · 375</span></div>
+  <div class="stage" style="display:grid;place-items:center">
+    <div class="phone2" id="ph2">
+      <div class="ph-intro"><span class="kicker">Why</span><h3>Proof of origin, tamper detection, and a record an auditor can check</h3><p class="hint">Scroll down ↓</p></div>
+      <div class="pin" id="pin"><div class="pin-inner">
+        <div class="tl2">
+          <div class="track" id="track"><div class="line" id="tl2line"><i id="tl2fill"></i></div>
+    <div class="node"><span class="mono-label">Today</span><h3>Signed</h3><p>One API call. The file is hashed locally; the signature and its certificate chain land in a statement file beside it.</p><code>contract.pdf.pq.json</code></div>
+    <div class="node"><span class="mono-label">Whenever it moves</span><h3>Shared</h3><p>Email them, commit them, drop them in cold storage. The pair travels together; nothing else is needed.</p><code>no account to open</code></div>
+    <div class="node"><span class="mono-label">If we are down · or gone</span><h3>Still verifiable</h3><p>Verification runs against a published root compiled into the SDK. It works when ProofQuarry is down, and if ProofQuarry is gone.</p><code>no network call</code></div>
+    <div class="node"><span class="mono-label">Years later</span><h3>Verified on any machine</h3><p>A borrowed laptop, openssl and a shell script are enough. The file either matches what was signed, or it doesn’t.</p><code>exit 0 · verified</code></div>
+          </div></div>
+      </div></div>
+      <div class="ph-outro"><p>After the last step the page scrolls on as usual.</p></div>
+    </div>
+  </div>
+  <details><summary>CSS + JS</summary><pre>/* Desktop */
+.line i { transform:scaleX(0); transform-origin:0 50%; }
+.node > * { opacity:0; transform:translateY(10px); filter:blur(6px);
+  transition: opacity 700ms var(--ease), transform 700ms var(--ease), filter 700ms var(--ease); }
+.node > :nth-child(2){transition-delay:90ms} .node > :nth-child(3){transition-delay:180ms} .node > :nth-child(4){transition-delay:270ms}
+.node.lit > * { opacity:1; transform:none; filter:none; }   /* label → title → text → fact */
+.node.lit::before { background:var(--accent); box-shadow:0 0 12px rgba(233,254,133,.5); }
+/* JS: one timeline (2400 ms, ease-in-out) drives the line; every frame, a node gets .lit the moment
+   the line reaches its dot, so dot and text start together, one step after another. */
+
+/* Tablet + mobile (below 1024) */
+.pin { height: calc(100vh + var(--travel)); }        /* --travel = track width - viewport width */
+.pin-inner { position:sticky; top:0; height:100vh; overflow:hidden; }
+.track { display:flex; gap:24px; transform: translateX(calc(var(--p) * -1 * var(--travel))); }
+/* JS: target = clamp((scrollY - pin.top) / travel, 0, 1); each frame current += (target - current) * 0.14
+   (smooth follow, no jumps); move the track by current; the line fills up to a focus point at
+   55% of the screen width and a step lights when its dot reaches that point;
+   each line of a step (label, title, text, fact) fades in, rises 12 px and un-blurs (6 px → 0)
+   continuously with the scroll, one after another, so nothing pops; unlit steps sit at 35% opacity. Scrolling up runs it backwards. */</pre></details>
+</div></section>
+
+<section class="ex" id="reveal"><div class="wrap">
+  <div class="ex-head"><div><h2>Reveal on scroll</h2><p>Everything that is not a scene fades in, rises 16 px and comes into focus once, when it scrolls into view. Neighbours follow 90 ms apart.</p>
+    <div class="specs"><span>700 ms</span><span>rise 16 px</span><span>blur 6 → 0</span><span>90 ms stagger</span><span>once</span></div></div>
+    <button class="btn ghost" data-replay="reveal">Replay</button></div>
+  <div class="stage"><div class="rgrid" id="rgrid">
+    <div class="rcard" style="--i:0"><div class="box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E9FE85" stroke-width="1.5"><polyline points="8,8 4,12 8,16"/><polyline points="16,8 20,12 16,16"/><line x1="13.5" y1="6" x2="10.5" y2="18"/></svg></div><h3>One API call to sign</h3><p>Send content, get back a signed envelope and a verification link.</p></div>
+    <div class="rcard" style="--i:1"><div class="box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E9FE85" stroke-width="1.5"><circle cx="7.5" cy="12" r="3.5"/><path d="M11 12h9.5M17.5 12v3M20.5 12v3"/></svg></div><h3>No keys, certificates or rotation</h3><p>Key generation, certificate management, HSM procurement and rotation schedules stay on our side.</p></div>
+    <div class="rcard" style="--i:2"><div class="box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E9FE85" stroke-width="1.5"><rect x="3" y="4.5" width="18" height="15" rx="2"/><polyline points="7,9.5 9.5,12 7,14.5"/><line x1="11.5" y1="14.5" x2="16" y2="14.5"/></svg></div><h3>Open-source SDK and CLI</h3><p>pq sign, pq verify — install and go. Apache-2.0.</p></div>
+  </div></div>
+  <details><summary>CSS</summary><pre>.reveal { opacity:0; transform:translateY(16px); filter:blur(6px); }
+.reveal.in-view { opacity:1; transform:none; filter:none;
+  transition: opacity 700ms var(--ease), transform 700ms var(--ease), filter 700ms var(--ease);
+  transition-delay: calc(var(--i) * 90ms); }
+/* IntersectionObserver adds .in-view once; never removed on scroll back. */</pre></details>
+</div></section>
+
+<section class="ex" id="panels"><div class="wrap">
+  <div class="ex-head"><div><h2>Panel edges</h2><p>A soft light sits on each panel’s border, a little lighter than the border itself. Scroll down and it slides down the edge; scroll up and it slides back up.</p>
+    <div class="specs"><span>tied to scroll</span><span>peak #C9C8D5 · 20%</span><span>band ±35%</span></div></div></div>
+  <div class="prow">
+    <div class="panel term"><div class="tbar"><i></i><i></i><i></i><span>SHELL</span></div>
+<pre>01  pipx install proofquarry
+02  pq login
+03  pq sign contract.pdf --save
+04  pq verify contract.pdf \
+      --statement contract.pdf.pq.json
+    <span class="ok">✓ runs with the network off</span></pre></div>
+    <div class="panel"><div class="mono-label" style="margin-bottom:12px">Chain of trust</div>
+      <div class="kv"><span>Root</span><span>HSM-backed · in the SDK</span></div>
+      <div class="kv"><span>Intermediate</span><span>travels in the statement</span></div>
+      <div class="kv"><span>Leaf certificate</span><span>lives ~15 minutes</span></div>
+      <div class="kv lit"><span>Signature</span><span>ECDSA P-256</span></div></div>
+    <div class="panel"><div class="mono-label" style="display:flex;justify-content:space-between"><span>Engineering</span><span>Sep 4, 2026</span></div>
+      <h3 style="font-size:20px;margin:16px 0 8px">Signing Our Own Builds</h3>
+      <p style="color:var(--muted);font-size:14px">We build a signing service, so it seemed reasonable to use it on our own software before asking anyone else to.</p>
+      <p class="mono-label" style="margin-top:32px;letter-spacing:.04em;text-transform:none">Jeff Grady · 12 min read</p></div>
+  </div>
+  <details><summary>CSS + JS</summary><pre>.panel::before { content:""; position:absolute; inset:-1px; border-radius:inherit; padding:1px;
+  background: linear-gradient(180deg, transparent calc(var(--p)*100% - 35%),
+              rgba(201,200,213,.2) calc(var(--p)*100%), transparent calc(var(--p)*100% + 35%));
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+
+/* JS on scroll (rAF): p = (innerHeight - rect.top) / (innerHeight + rect.height),
+   clamp 0…1, set --p = -0.15 + p * 1.3 on each visible panel. */</pre></details>
+</div></section>
+
+<section class="ex" id="buttons"><div class="wrap">
+  <div class="ex-head"><div><h2>Buttons</h2><p>Hover: Primary gets lighter, Secondary gets a fill; the chevron grows a tail and becomes an arrow. Copy: the button shows a check for 2 seconds.</p>
+    <div class="specs"><span>colour 150 ms</span><span>chevron → arrow 220 ms</span><span>ease</span><span>copied: 2 s</span></div></div></div>
+  <div class="stage" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+    <a class="btn primary" href="#modal">Start free <svg class="morph" viewBox="0 0 16 16" aria-hidden="true"><path class="shaft" d="M13 8H2.5" pathLength="1"/><polyline class="head" points="6.5,3.5 11,8 6.5,12.5"/></svg></a>
+    <a class="btn secondary" href="#buttons">Read the docs <svg class="morph" viewBox="0 0 16 16" aria-hidden="true"><path class="shaft" d="M13 8H2.5" pathLength="1"/><polyline class="head" points="6.5,3.5 11,8 6.5,12.5"/></svg></a>
+    <button class="btn secondary" id="copyBtn" type="button"><span id="copyLabel">Copy commands</span></button>
+    <span class="btn secondary is-disabled" aria-disabled="true">Coming soon</span>
+  </div>
+  <details><summary>CSS</summary><pre>.btn { transition: background 150ms var(--ease), border-color 150ms var(--ease); }
+.primary:hover   { background: var(--accent-hover); }            /* #EDFE9D */
+.secondary:hover { background: var(--surface-2); border-color: var(--fg-faint); }
+/* One icon: a chevron that grows a tail into an arrow (like x.ai) */
+/* &lt;svg viewBox="0 0 16 16"&gt;&lt;path class="shaft" d="M13 8H2.5" pathLength="1"/&gt;&lt;polyline class="head" points="6.5,3.5 11,8 6.5,12.5"/&gt;&lt;/svg&gt; */
+.shaft { stroke-dasharray:1; stroke-dashoffset:1; transition: stroke-dashoffset 220ms var(--ease); }
+.head  { transition: transform 220ms var(--ease); }
+.shaft { stroke-linecap:butt; opacity:0; }                         /* no dot when hidden */
+@media (hover:hover) { .btn:hover .shaft { stroke-dashoffset:0; opacity:1; } }
+.btn:hover .head  { transform:translateX(2px); }
+.btn[aria-disabled="true"] { opacity:.45; pointer-events:none; }  /* "Coming soon": no hover, no click */
+/* Copy: on click swap label to "Copied ✓" for 2000 ms, then back. */</pre></details>
+</div></section>
+
+<section class="ex" id="rows"><div class="wrap">
+  <div class="ex-head"><div><h2>Rows</h2><p>Hover a row: it gets a faint background and its line gets a touch brighter.</p>
+    <div class="specs"><span>150 ms</span><span>bg Surface 2 · 40%</span><span>line #6A6D85 · 40%</span></div></div></div>
+  <div class="stage rows" style="max-width:640px">
+    <div class="kv"><span>Signer</span><span>jane@acme.com</span></div>
+    <div class="kv"><span>Algorithm</span><span>ECDSA P-256 · SHA-256</span></div>
+    <div class="kv"><span>Signed</span><span>2026-08-24 14:02:11 UTC</span></div>
+    <div class="kv"><span>Statement</span><span>contract.pdf.pq.json</span></div>
+    <div class="kv lit"><span>Root</span><span>published · verifies offline</span></div>
+  </div>
+  <details><summary>CSS</summary><pre>.row { transition: background 150ms var(--ease), border-color 150ms var(--ease); }
+.row:hover { background: rgba(26,32,53,.4); border-bottom-color: rgba(106,109,133,.4); }  /* Surface 2 · 40% */</pre></details>
+</div></section>
+
+<section class="ex" id="nav-links"><div class="wrap">
+  <div class="ex-head"><div><h2>Header links</h2><p>Desktop header: on hover a soft pill appears under the link and the text turns white. The links never move. The current page stays white without a pill. Footer links hover the same way but without the pill: only the colour changes.</p>
+    <div class="specs"><span>150 ms</span><span>pill Surface 2 · 60%</span><span>radius 128</span><span>text Muted → Primary</span></div></div></div>
+  <div class="stage" style="padding:0;min-height:0">
+    <div class="dnav"><span class="brand" style="font-size:17px">ProofQuarry</span>
+      <nav class="dlinks"><a href="#nav-links">Docs</a><a href="#nav-links" aria-current="page">Pricing</a><a href="#nav-links">Security</a><a href="#nav-links">Company</a><a href="#nav-links">News</a></nav>
+      <span class="dact"><a href="#nav-links" class="dlogin">Log in</a><a class="btn primary" href="#modal">Start free <svg class="morph" viewBox="0 0 16 16" aria-hidden="true"><path class="shaft" d="M13 8H2.5" pathLength="1"/><polyline class="head" points="6.5,3.5 11,8 6.5,12.5"/></svg></a></span></div>
+  </div>
+  <details><summary>CSS</summary><pre>.nav a { position:relative; color: var(--fg-muted); padding: 8px 12px; border-radius: 128px;
+  transition: color 150ms var(--ease), background 150ms var(--ease); }
+.nav a:hover { color: var(--fg); background: rgba(26,32,53,.6); }   /* Surface 2 · 60% */
+.nav a[aria-current="page"] { color: var(--fg); }                   /* current page: white, no pill */
+/* padding is always there, only the background appears — nothing shifts on hover */</pre></details>
+</div></section>
+
+<section class="ex" id="header"><div class="wrap">
+  <div class="ex-head"><div><h2>Header on scroll</h2><p>At the top of a page the header has no fill, so the background runs behind it. As soon as the page head scrolls away, the header gets a dark blurred fill and a thin line under it. Press Play or scroll inside the page below.</p>
+    <div class="specs"><span>150 ms</span><span>bg #0E121C · 72%</span><span>blur 24</span><span>line Hairline</span></div></div>
+    <button class="btn ghost" id="playHeader" type="button">Play</button></div>
+  <div class="state"><span class="state-dot" id="hstateDot"></span><span id="hstate">Top · transparent</span></div>
+  <div class="scrollbox" id="sbox">
+    <div class="mhead" id="shead"><span class="brand" style="font-size:16px">ProofQuarry</span><nav><span>Docs</span><span style="color:var(--fg)">Pricing</span><span>Security</span><span>Company</span><span>News</span></nav><span class="hact"><span style="font:400 13px/1 var(--mono);color:var(--muted)">Log in</span><span class="btn primary" style="height:30px;padding:0 12px;font-size:12px">Start free</span></span></div>
+    <div class="field minihead" data-preset="min" data-seed="23"><canvas aria-hidden="true"></canvas>
+      <span class="kicker">Pricing</span><h3>Same cryptography on every tier</h3><p>A proof issued on the free tier verifies exactly like one issued on Enterprise, permanently. Volume, seats and history length are what change.</p></div>
+    <div class="filler">
+      <div class="panel"><h4>Permanent means permanent</h4><p>Cancel your account and every signature you’ve already issued still verifies — verification doesn’t consult us. Your hosted searchable history and your ability to issue new signatures end with the subscription.</p></div>
+      <div class="panel"><h4>Signed records and verifications are separate meters</h4><p>A signed record is one signature we issue. A private verification checks a signature that isn’t public and requires authentication. Public verification is unmetered on every tier, because it happens on the reader’s machine.</p></div>
+      <div class="panel rows"><div class="kv"><span>Signer</span><span>jane@acme.com</span></div><div class="kv"><span>Algorithm</span><span>ECDSA P-256 · SHA-256</span></div><div class="kv"><span>Signed</span><span>2026-08-24 14:02:11 UTC</span></div><div class="kv lit"><span>Root</span><span>published · verifies offline</span></div></div>
+    </div>
+  </div>
+  <details><summary>CSS + JS</summary><pre>.header { transition: background 150ms var(--ease), border-color 150ms var(--ease); border-bottom:1px solid transparent; }
+.header.scrolled { background: rgba(14,18,28,.72); backdrop-filter: blur(24px); border-bottom-color: var(--hairline); }
+/* JS: IntersectionObserver on the page head — when it is no longer in view add .scrolled, when it comes back remove it. */</pre></details>
+</div></section>
+
+<section class="ex" id="menu"><div class="wrap">
+  <div class="ex-head"><div><h2>Menu · tablet and mobile</h2><p>The burger opens the full-screen menu; ✕ closes it. The page behind does not scroll while it is open.</p>
+    <div class="specs"><span>150 ms fade</span><span>burger ↔ ✕</span><span>body scroll locked</span></div></div></div>
+  <div class="stage"><div class="phone" id="phone">
+    <div class="mhead"><svg width="24" height="25" viewBox="0 0 24 25" aria-hidden="true"><path d="M2 8l10-6 10 6-10 6z" fill="#E9FE85"/><path d="M12 14l10-6v10l-10 6z" fill="#C6DB6E"/></svg>
+      <span style="display:flex;align-items:center;gap:16px"><span style="font:400 14px/1 var(--mono);color:var(--muted)">Log in</span>
+      <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false"><svg class="bars" viewBox="0 0 28 24"><path d="M2 9h24M2 15h24" stroke="currentColor" stroke-width="1.5"/></svg><svg class="x" viewBox="0 0 28 24"><path d="M7 5l14 14M21 5L7 19" stroke="currentColor" stroke-width="1.5"/></svg></button></span></div>
+    <div class="sheet"><ul><li>Docs</li><li>Pricing</li><li>Security</li><li>Company</li><li>News</li></ul>
+      <div class="acts"><span class="btn secondary">Log in</span><span class="btn primary">Start free</span></div></div>
+    <div class="field minihead" data-preset="full" data-seed="17" style="height:100%"><canvas aria-hidden="true"></canvas><h3 style="font-size:32px">Prove where your content came from</h3></div>
+  </div></div>
+  <details><summary>CSS</summary><pre>.sheet { opacity:0; visibility:hidden; transition: opacity 150ms var(--ease), visibility 0s linear 150ms; }
+.open .sheet { opacity:1; visibility:visible; transition: opacity 150ms var(--ease); }
+.burger .bars, .burger .x { transition: opacity 150ms var(--ease); }
+/* JS: toggle .open on click, set aria-expanded, lock body scroll (overflow:hidden) while open. */</pre></details>
+</div></section>
+
+<section class="ex" id="modal"><div class="wrap">
+  <div class="ex-head"><div><h2>Modal</h2><p>Every Start free button opens the sign-up dialog over a dimmed page. It closes with ✕, Esc or a click outside.</p>
+    <div class="specs"><span>150 ms</span><span>rise 8 px · scale .98 → 1</span><span>backdrop 60%</span></div></div></div>
+  <div class="stage modal-stage" id="mstage">
+    <button class="btn primary" id="openModal" type="button">Start free <svg class="morph" viewBox="0 0 16 16" aria-hidden="true"><path class="shaft" d="M13 8H2.5" pathLength="1"/><polyline class="head" points="6.5,3.5 11,8 6.5,12.5"/></svg></button>
+    <div class="backdrop" id="backdrop" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle">
+        <button class="close" id="closeModal" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="1.6"/></svg></button>
+        <h3 id="mtitle">Create your account</h3>
+        <p class="mbody">Free tier. Five signed records a month, no card. You can move to a paid tier later without reissuing&nbsp;anything.</p>
+        <button class="btn secondary gbtn" type="button"><svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continue with Google</button>
+        <p class="fine">Signing in creates an account if you don’t have one&nbsp;yet.</p>
+        <hr class="mrule">
+        <p class="fine">By continuing you agree to the <a href="#modal">Terms</a> and the <a href="#modal">Privacy&nbsp;Policy</a>.</p>
+      </div>
+    </div>
+  </div>
+  <details><summary>CSS</summary><pre>.backdrop { background: rgba(5,7,12,.6); opacity:0; visibility:hidden;
+  transition: opacity 150ms var(--ease), visibility 0s linear 150ms; }
+.backdrop.open { opacity:1; visibility:visible; transition: opacity 150ms var(--ease); }
+.modal { transform: translateY(8px) scale(.98); transition: transform 150ms var(--ease);
+  box-shadow: 0 40px 80px -30px rgba(0,0,0,.75); }           /* Shadow/Modal */
+.backdrop.open .modal { transform:none; }</pre></details>
+</div></section>
+
+<section class="ex" id="footer-glow"><div class="wrap">
+  <div class="ex-head"><div><h2>Footer wordmark</h2><p>The footer from the design. Move the mouse over it: a soft light, only a little lighter than the letters, appears inside the wordmark and follows the cursor; it fades out when the mouse leaves. Never on the background.</p>
+    <div class="specs"><span>fade in / out 400 ms</span><span>follows with easing</span><span>radius 330</span><span>#C9C8D5 · 22% → 8% → 0</span><span>no effect on touch</span></div></div></div>
+  <div class="ftr" id="ftr">
+    <svg class="ftr-svg" id="ftrSvg" viewBox="0 0 1440 536" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ProofQuarry footer">
+      <defs>
+        <radialGradient id="wmGlow"><stop offset="0" stop-color="#C9C8D5" stop-opacity=".22"/><stop offset=".45" stop-color="#C9C8D5" stop-opacity=".08"/><stop offset="1" stop-color="#C9C8D5" stop-opacity="0"/></radialGradient>
+        <mask id="wmMask" maskUnits="userSpaceOnUse" x="0" y="0" width="1440" height="536"><g transform="translate(80 207)" fill="#fff"><path d="M699.125 157.913C705.826 152.042 711.339 145.024 715.655 136.799C721.672 125.437 724.907 112.573 725.485 98.3041C725.493 98.0977 725.501 97.8913 725.509 97.6848C725.551 96.4958 725.575 95.2985 725.584 94.0929C725.584 93.9856 725.584 93.8782 725.584 93.7792C725.584 93.7461 725.584 93.7131 725.584 93.6801C725.584 93.647 725.584 93.614 725.584 93.581C725.584 77.4628 722.274 63.2273 715.548 50.8167C708.88 38.5051 699.587 28.8111 687.727 21.8833C675.868 14.9637 662.374 11.5039 647.205 11.5039C647.123 11.5039 647.04 11.5039 646.958 11.5039C646.875 11.5039 646.793 11.5039 646.71 11.5039C631.541 11.5039 618.048 14.9637 606.188 21.8833C594.329 28.8111 585.036 38.5051 578.368 50.8167C571.641 63.2273 568.332 77.4628 568.332 93.581C568.332 93.614 568.332 93.647 568.332 93.6801C568.332 93.7131 568.332 93.7461 568.332 93.7792C568.332 93.8865 568.332 93.9938 568.332 94.0929C568.332 95.2985 568.365 96.4958 568.406 97.6848C568.406 97.8913 568.423 98.0977 568.431 98.3041C569.009 112.573 572.244 125.429 578.26 136.799C584.879 149.408 594.271 159.201 606.527 166.319C616.604 172.149 628.158 175.592 641.173 176.616C642.122 176.831 642.939 176.946 643.591 176.946H644.276C645.175 176.946 646.067 176.93 646.95 176.913C647.833 176.938 648.724 176.946 649.624 176.946H732.301V157.913H699.108H699.125ZM646.966 157.905C636.047 157.864 626.548 155.147 618.502 149.648C610.348 144.157 604.018 136.543 599.371 126.849C594.775 117.164 592.455 105.983 592.455 93.325C592.455 80.6666 594.775 70.2873 599.371 61.0392C604.018 51.6919 610.397 44.4751 618.601 39.2813C626.689 34.2361 636.188 31.6599 646.966 31.6186C657.744 31.6599 667.243 34.2279 675.331 39.2813C683.535 44.4751 689.914 51.6919 694.561 61.0392C699.158 70.2873 701.477 81.1125 701.477 93.325C701.477 105.537 699.158 117.164 694.561 126.849C689.914 136.543 683.584 144.157 675.43 149.648C667.384 155.147 657.885 157.864 646.966 157.905Z"/>
+<path d="M116.728 36.0708C112.378 28.9531 106.057 23.4125 97.9026 19.5563C89.6497 15.7002 79.7628 13.7184 68.1509 13.7184H-0.00195312V174.669H23.6674V110.287H68.1509C79.6143 110.287 89.5012 108.313 97.7541 104.259C106.057 100.254 112.378 94.6147 116.728 87.3979C121.126 80.181 123.297 71.577 123.297 61.5857C123.297 51.5944 121.126 43.2381 116.728 36.0708ZM91.2757 83.0463C85.6967 88.0915 77.5839 90.6595 67.0119 90.6595H23.6674V33.2055H67.0119C77.7407 33.2055 85.8947 35.6249 91.3746 40.571C96.9123 45.4676 99.6276 52.5853 99.6276 61.7839C99.6276 70.9825 96.8629 77.9516 91.2757 83.0463Z"/>
+<path d="M181.692 66.0562C176.996 69.6812 173.414 74.6025 170.732 80.5807V60.6807H147.491V174.689H170.732V115.228C170.732 103.767 173.538 95.0887 179.108 89.3086C184.696 83.4708 193.072 80.5807 204.255 80.5807C206.194 80.5807 207.828 80.6385 209.165 80.6881C210.502 80.7706 211.567 80.9606 212.302 81.233V59.3513C210.965 58.7486 208.563 58.4513 205.155 58.4513C196.076 58.4513 188.244 60.9863 181.7 66.0645L181.692 66.0562Z"/>
+<path d="M333.238 86.6184C328.394 77.8162 321.626 70.9461 312.779 65.9505C304.031 60.9549 293.756 58.4364 281.995 58.4364C270.235 58.4364 260.199 60.9549 251.501 65.9505C242.753 70.9461 235.936 77.8162 230.943 86.6184C225.95 95.4206 223.433 105.651 223.433 117.278C223.433 128.904 225.9 138.978 230.794 147.978C235.738 156.978 242.555 164.096 251.402 169.191C260.15 174.335 270.375 176.953 281.995 176.953C293.616 176.953 304.031 174.335 312.779 169.191C321.626 164.096 328.394 156.978 333.238 147.978C338.083 138.978 340.509 128.697 340.509 117.278C340.509 105.858 338.083 95.4206 333.238 86.6184ZM312.383 138.49C309.371 144.617 305.318 149.365 300.177 152.775C295.035 156.235 289.01 157.92 281.995 157.92C274.98 157.92 269.294 156.235 263.955 152.775C258.714 149.365 254.612 144.617 251.699 138.49C248.786 132.355 247.35 125.238 247.35 117.03C247.35 104.966 250.56 95.3215 257.03 88.1543C263.558 81.0282 271.811 77.4694 281.995 77.4694C292.18 77.4694 300.623 81.0282 307.101 88.0552C313.571 95.1729 316.831 104.817 316.831 117.03C316.831 125.238 315.354 132.355 312.383 138.49Z"/>
+<path d="M465.308 86.6184C460.463 77.8162 453.638 70.9461 444.849 65.9505C436.051 60.9549 425.768 58.4364 414.007 58.4364C402.247 58.4364 392.211 60.9549 383.513 65.9505C374.814 70.9461 367.948 77.8162 362.955 86.6184C357.962 95.4206 355.494 105.651 355.494 117.278C355.494 128.904 357.962 138.978 362.856 147.978C367.75 156.978 374.616 164.096 383.414 169.191C392.212 174.335 402.396 176.953 414.007 176.953C425.619 176.953 436.051 174.335 444.849 169.191C453.638 164.096 460.463 156.978 465.308 147.978C470.152 138.978 472.571 128.697 472.571 117.278C472.571 105.858 470.152 95.4206 465.308 86.6184ZM444.403 138.49C441.432 144.617 437.38 149.365 432.247 152.775C427.105 156.235 421.022 157.92 414.007 157.92C406.992 157.92 401.306 156.235 396.016 152.775C390.784 149.365 386.633 144.617 383.76 138.49C380.847 132.355 379.362 125.238 379.362 117.03C379.362 104.966 382.63 95.3215 389.1 88.1543C395.57 81.0282 403.873 77.4694 414.007 77.4694C424.142 77.4694 432.684 81.0282 439.163 88.0552C445.633 95.1729 448.901 104.817 448.901 117.03C448.901 125.238 447.366 132.355 444.403 138.49Z"/>
+<path d="M543.475 11.4991C530.386 11.4991 520.54 14.5873 513.996 20.7803C507.451 26.9732 504.175 35.8745 504.175 47.4925V60.671H482.271V79.2251H504.175V174.679H527.415V79.2251H553.544V60.671H527.415V48.1448C527.415 42.3565 528.892 37.8315 531.864 34.6112C534.868 31.4486 539.613 29.8054 546.182 29.8054C548.254 29.8054 550.16 29.9706 551.885 30.2678C553.577 30.5651 554.964 30.8706 556.003 31.1679V13.2662C554.526 12.6634 552.81 12.234 550.878 11.9285C548.947 11.623 546.488 11.4908 543.492 11.4908L543.475 11.4991Z"/>
+<path d="M1042.33 66.0562C1037.63 69.6812 1034.05 74.6025 1031.37 80.5807V60.6807H1008.13V174.689H1031.37V115.228C1031.37 103.767 1034.17 95.0887 1039.74 89.3086C1045.33 83.4708 1053.71 80.5807 1064.89 80.5807C1066.83 80.5807 1068.46 80.6385 1069.8 80.6881C1071.14 80.7706 1072.2 80.9606 1072.94 81.233V59.3513C1071.6 58.7486 1069.2 58.4513 1065.79 58.4513C1056.71 58.4513 1048.88 60.9863 1042.34 66.0645L1042.33 66.0562Z"/>
+<path d="M1127.94 66.0562C1123.24 69.6812 1119.66 74.6025 1116.98 80.5807V60.6807H1093.74V174.689H1116.98V115.228C1116.98 103.767 1119.79 95.0887 1125.36 89.3086C1130.94 83.4708 1139.32 80.5807 1150.5 80.5807C1152.44 80.5807 1154.08 80.6385 1155.41 80.6881C1156.75 80.7706 1157.82 80.9606 1158.55 81.233V59.3513C1157.21 58.7486 1154.81 58.4513 1151.4 58.4513C1142.32 58.4513 1134.49 60.9863 1127.95 66.0645L1127.94 66.0562Z"/>
+<path d="M1255.86 60.6818L1224.6 141.661L1191.98 60.6818H1166.73L1212.31 167.382L1189.07 220.509H1212.98L1280 60.6818H1255.86Z"/>
+<path d="M965.486 68.8653C958.075 61.8962 946.851 58.4364 931.979 58.4364C917.108 58.4364 905.983 61.6485 897.334 68.0726C888.734 74.4555 883.848 83.0595 882.858 93.7857H904.951C905.685 88.3029 908.36 84.0009 912.907 81.0282C917.405 78.0639 923.479 76.528 931.088 76.528C938.697 76.528 944.73 78.4107 948.386 82.0687C952.042 85.7266 953.874 91.1681 953.874 98.4841V103.777L921.498 108.971C907.914 111.043 897.532 115.048 890.319 120.936C883.056 126.815 879.499 134.832 879.499 144.964C879.499 155.096 882.907 162.618 889.774 168.349C896.599 174.087 905.834 176.953 917.454 176.953C927.284 176.953 935.635 174.831 942.461 170.578C947.346 167.515 951.11 163.559 953.874 158.663V174.682H976.702V99.3759C976.702 85.9743 972.947 75.7931 965.486 68.8653ZM953.874 135.815C953.874 142.347 950.961 147.829 945.027 152.131C939.192 156.433 931.781 158.613 922.835 158.613C916.117 158.613 911.025 157.325 907.518 154.708C904.01 152.082 902.277 148.176 902.277 142.941C902.277 137.706 904.159 133.495 907.963 130.671C911.768 127.855 917.454 125.832 925.063 124.643L953.874 120.093V135.815Z"/>
+<path d="M832.051 60.6854V126.24C831.588 131.557 830.243 136.38 827.932 140.607C825.011 145.9 821.058 150.021 816.065 152.993C811.072 155.991 805.402 157.469 798.989 157.469C791.842 157.469 786.338 155.561 782.459 151.655C778.555 147.808 776.649 141.912 776.649 134.001V60.6771H753.408V139.352C753.408 146.668 754.993 153.158 758.211 158.831C761.405 164.479 765.903 168.93 771.713 172.117C777.523 175.313 784.233 176.923 791.842 176.923C801.663 176.923 810.42 174.437 818.078 169.417C823.921 165.627 828.493 160.738 832.042 154.975V174.685H855.283V60.6854H832.042H832.051Z"/></g></mask>
+      </defs>
+      <rect width="1440" height="536" fill="#000"/>
+      <text fill="#6A6D85" font-family="IBM Plex Mono" font-size="14" letter-spacing="0.04em" x="80" y="80.25">Cryptographic signatures</text><text fill="#6A6D85" font-family="IBM Plex Mono" font-size="14" letter-spacing="0.04em" x="80" y="102.25">for documents</text><text fill="#6A6D85" font-family="IBM Plex Mono" font-size="12" letter-spacing="0.12em" x="400" y="77">PRODUCT</text><text fill="#9598AB" font-family="IBM Plex Mono" font-size="14" font-weight="500" letter-spacing="0.02em" x="400" y="113.25">Overview</text><text fill="#9598AB" font-family="IBM Plex Mono" font-size="14" font-weight="500" letter-spacing="0.02em" x="400" y="143.25">Pricing</text><text fill="#9598AB" font-family="IBM Plex Mono" font-size="14" font-weight="500" letter-spacing="0.02em" x="400" y="173.25">Log in</text><text fill="#6A6D85" font-family="IBM Plex Mono" font-size="12" letter-spacing="0.12em" x="650" y="77">COMPANY</text><text fill="#9598AB" font-family="IBM Plex Mono" font-size="14" font-weight="500" letter-spacing="0.02em" x="650" y="113.25">About</text><text fill="#9598AB" font-family="IBM Plex Mono" font-size="14" font-weight="500" letter-spacing="0.02em" x="650" y="143.25">Security</text><text fill="#9598AB" font-family="IBM Plex Mono" font-size="14" font-weight="500" letter-spacing="0.02em" x="650" y="173.25">News</text><text fill="#6A6D85" font-family="IBM Plex Mono" font-size="12" letter-spacing="0.12em" x="900" y="77">DEVELOPERS</text><text fill="#9598AB" font-family="IBM Plex Mono" font-size="14" font-weight="500" letter-spacing="0.02em" x="900" y="113.25">Quick start</text><text fill="#9598AB" font-family="IBM Plex Mono" font-size="14" font-weight="500" letter-spacing="0.02em" x="900" y="143.25">API reference</text><text fill="#9598AB" font-family="IBM Plex Mono" font-size="14" font-weight="500" letter-spacing="0.02em" x="900" y="173.25">GitHub</text><text fill="#6A6D85" font-family="IBM Plex Mono" font-size="12" letter-spacing="0.12em" x="1150" y="77">CONTACT</text><text fill="#9598AB" font-family="IBM Plex Mono" font-size="14" font-weight="500" letter-spacing="0.02em" x="1150" y="113.25">sales@proofquarry.com</text><text fill="#9598AB" font-family="IBM Plex Mono" font-size="14" font-weight="500" letter-spacing="0.02em" x="1150" y="143.25">support@proofquarry.com</text>
+      <g transform="translate(80 207)" fill="#282F46" opacity=".5"><path d="M699.125 157.913C705.826 152.042 711.339 145.024 715.655 136.799C721.672 125.437 724.907 112.573 725.485 98.3041C725.493 98.0977 725.501 97.8913 725.509 97.6848C725.551 96.4958 725.575 95.2985 725.584 94.0929C725.584 93.9856 725.584 93.8782 725.584 93.7792C725.584 93.7461 725.584 93.7131 725.584 93.6801C725.584 93.647 725.584 93.614 725.584 93.581C725.584 77.4628 722.274 63.2273 715.548 50.8167C708.88 38.5051 699.587 28.8111 687.727 21.8833C675.868 14.9637 662.374 11.5039 647.205 11.5039C647.123 11.5039 647.04 11.5039 646.958 11.5039C646.875 11.5039 646.793 11.5039 646.71 11.5039C631.541 11.5039 618.048 14.9637 606.188 21.8833C594.329 28.8111 585.036 38.5051 578.368 50.8167C571.641 63.2273 568.332 77.4628 568.332 93.581C568.332 93.614 568.332 93.647 568.332 93.6801C568.332 93.7131 568.332 93.7461 568.332 93.7792C568.332 93.8865 568.332 93.9938 568.332 94.0929C568.332 95.2985 568.365 96.4958 568.406 97.6848C568.406 97.8913 568.423 98.0977 568.431 98.3041C569.009 112.573 572.244 125.429 578.26 136.799C584.879 149.408 594.271 159.201 606.527 166.319C616.604 172.149 628.158 175.592 641.173 176.616C642.122 176.831 642.939 176.946 643.591 176.946H644.276C645.175 176.946 646.067 176.93 646.95 176.913C647.833 176.938 648.724 176.946 649.624 176.946H732.301V157.913H699.108H699.125ZM646.966 157.905C636.047 157.864 626.548 155.147 618.502 149.648C610.348 144.157 604.018 136.543 599.371 126.849C594.775 117.164 592.455 105.983 592.455 93.325C592.455 80.6666 594.775 70.2873 599.371 61.0392C604.018 51.6919 610.397 44.4751 618.601 39.2813C626.689 34.2361 636.188 31.6599 646.966 31.6186C657.744 31.6599 667.243 34.2279 675.331 39.2813C683.535 44.4751 689.914 51.6919 694.561 61.0392C699.158 70.2873 701.477 81.1125 701.477 93.325C701.477 105.537 699.158 117.164 694.561 126.849C689.914 136.543 683.584 144.157 675.43 149.648C667.384 155.147 657.885 157.864 646.966 157.905Z"/>
+<path d="M116.728 36.0708C112.378 28.9531 106.057 23.4125 97.9026 19.5563C89.6497 15.7002 79.7628 13.7184 68.1509 13.7184H-0.00195312V174.669H23.6674V110.287H68.1509C79.6143 110.287 89.5012 108.313 97.7541 104.259C106.057 100.254 112.378 94.6147 116.728 87.3979C121.126 80.181 123.297 71.577 123.297 61.5857C123.297 51.5944 121.126 43.2381 116.728 36.0708ZM91.2757 83.0463C85.6967 88.0915 77.5839 90.6595 67.0119 90.6595H23.6674V33.2055H67.0119C77.7407 33.2055 85.8947 35.6249 91.3746 40.571C96.9123 45.4676 99.6276 52.5853 99.6276 61.7839C99.6276 70.9825 96.8629 77.9516 91.2757 83.0463Z"/>
+<path d="M181.692 66.0562C176.996 69.6812 173.414 74.6025 170.732 80.5807V60.6807H147.491V174.689H170.732V115.228C170.732 103.767 173.538 95.0887 179.108 89.3086C184.696 83.4708 193.072 80.5807 204.255 80.5807C206.194 80.5807 207.828 80.6385 209.165 80.6881C210.502 80.7706 211.567 80.9606 212.302 81.233V59.3513C210.965 58.7486 208.563 58.4513 205.155 58.4513C196.076 58.4513 188.244 60.9863 181.7 66.0645L181.692 66.0562Z"/>
+<path d="M333.238 86.6184C328.394 77.8162 321.626 70.9461 312.779 65.9505C304.031 60.9549 293.756 58.4364 281.995 58.4364C270.235 58.4364 260.199 60.9549 251.501 65.9505C242.753 70.9461 235.936 77.8162 230.943 86.6184C225.95 95.4206 223.433 105.651 223.433 117.278C223.433 128.904 225.9 138.978 230.794 147.978C235.738 156.978 242.555 164.096 251.402 169.191C260.15 174.335 270.375 176.953 281.995 176.953C293.616 176.953 304.031 174.335 312.779 169.191C321.626 164.096 328.394 156.978 333.238 147.978C338.083 138.978 340.509 128.697 340.509 117.278C340.509 105.858 338.083 95.4206 333.238 86.6184ZM312.383 138.49C309.371 144.617 305.318 149.365 300.177 152.775C295.035 156.235 289.01 157.92 281.995 157.92C274.98 157.92 269.294 156.235 263.955 152.775C258.714 149.365 254.612 144.617 251.699 138.49C248.786 132.355 247.35 125.238 247.35 117.03C247.35 104.966 250.56 95.3215 257.03 88.1543C263.558 81.0282 271.811 77.4694 281.995 77.4694C292.18 77.4694 300.623 81.0282 307.101 88.0552C313.571 95.1729 316.831 104.817 316.831 117.03C316.831 125.238 315.354 132.355 312.383 138.49Z"/>
+<path d="M465.308 86.6184C460.463 77.8162 453.638 70.9461 444.849 65.9505C436.051 60.9549 425.768 58.4364 414.007 58.4364C402.247 58.4364 392.211 60.9549 383.513 65.9505C374.814 70.9461 367.948 77.8162 362.955 86.6184C357.962 95.4206 355.494 105.651 355.494 117.278C355.494 128.904 357.962 138.978 362.856 147.978C367.75 156.978 374.616 164.096 383.414 169.191C392.212 174.335 402.396 176.953 414.007 176.953C425.619 176.953 436.051 174.335 444.849 169.191C453.638 164.096 460.463 156.978 465.308 147.978C470.152 138.978 472.571 128.697 472.571 117.278C472.571 105.858 470.152 95.4206 465.308 86.6184ZM444.403 138.49C441.432 144.617 437.38 149.365 432.247 152.775C427.105 156.235 421.022 157.92 414.007 157.92C406.992 157.92 401.306 156.235 396.016 152.775C390.784 149.365 386.633 144.617 383.76 138.49C380.847 132.355 379.362 125.238 379.362 117.03C379.362 104.966 382.63 95.3215 389.1 88.1543C395.57 81.0282 403.873 77.4694 414.007 77.4694C424.142 77.4694 432.684 81.0282 439.163 88.0552C445.633 95.1729 448.901 104.817 448.901 117.03C448.901 125.238 447.366 132.355 444.403 138.49Z"/>
+<path d="M543.475 11.4991C530.386 11.4991 520.54 14.5873 513.996 20.7803C507.451 26.9732 504.175 35.8745 504.175 47.4925V60.671H482.271V79.2251H504.175V174.679H527.415V79.2251H553.544V60.671H527.415V48.1448C527.415 42.3565 528.892 37.8315 531.864 34.6112C534.868 31.4486 539.613 29.8054 546.182 29.8054C548.254 29.8054 550.16 29.9706 551.885 30.2678C553.577 30.5651 554.964 30.8706 556.003 31.1679V13.2662C554.526 12.6634 552.81 12.234 550.878 11.9285C548.947 11.623 546.488 11.4908 543.492 11.4908L543.475 11.4991Z"/>
+<path d="M1042.33 66.0562C1037.63 69.6812 1034.05 74.6025 1031.37 80.5807V60.6807H1008.13V174.689H1031.37V115.228C1031.37 103.767 1034.17 95.0887 1039.74 89.3086C1045.33 83.4708 1053.71 80.5807 1064.89 80.5807C1066.83 80.5807 1068.46 80.6385 1069.8 80.6881C1071.14 80.7706 1072.2 80.9606 1072.94 81.233V59.3513C1071.6 58.7486 1069.2 58.4513 1065.79 58.4513C1056.71 58.4513 1048.88 60.9863 1042.34 66.0645L1042.33 66.0562Z"/>
+<path d="M1127.94 66.0562C1123.24 69.6812 1119.66 74.6025 1116.98 80.5807V60.6807H1093.74V174.689H1116.98V115.228C1116.98 103.767 1119.79 95.0887 1125.36 89.3086C1130.94 83.4708 1139.32 80.5807 1150.5 80.5807C1152.44 80.5807 1154.08 80.6385 1155.41 80.6881C1156.75 80.7706 1157.82 80.9606 1158.55 81.233V59.3513C1157.21 58.7486 1154.81 58.4513 1151.4 58.4513C1142.32 58.4513 1134.49 60.9863 1127.95 66.0645L1127.94 66.0562Z"/>
+<path d="M1255.86 60.6818L1224.6 141.661L1191.98 60.6818H1166.73L1212.31 167.382L1189.07 220.509H1212.98L1280 60.6818H1255.86Z"/>
+<path d="M965.486 68.8653C958.075 61.8962 946.851 58.4364 931.979 58.4364C917.108 58.4364 905.983 61.6485 897.334 68.0726C888.734 74.4555 883.848 83.0595 882.858 93.7857H904.951C905.685 88.3029 908.36 84.0009 912.907 81.0282C917.405 78.0639 923.479 76.528 931.088 76.528C938.697 76.528 944.73 78.4107 948.386 82.0687C952.042 85.7266 953.874 91.1681 953.874 98.4841V103.777L921.498 108.971C907.914 111.043 897.532 115.048 890.319 120.936C883.056 126.815 879.499 134.832 879.499 144.964C879.499 155.096 882.907 162.618 889.774 168.349C896.599 174.087 905.834 176.953 917.454 176.953C927.284 176.953 935.635 174.831 942.461 170.578C947.346 167.515 951.11 163.559 953.874 158.663V174.682H976.702V99.3759C976.702 85.9743 972.947 75.7931 965.486 68.8653ZM953.874 135.815C953.874 142.347 950.961 147.829 945.027 152.131C939.192 156.433 931.781 158.613 922.835 158.613C916.117 158.613 911.025 157.325 907.518 154.708C904.01 152.082 902.277 148.176 902.277 142.941C902.277 137.706 904.159 133.495 907.963 130.671C911.768 127.855 917.454 125.832 925.063 124.643L953.874 120.093V135.815Z"/>
+<path d="M832.051 60.6854V126.24C831.588 131.557 830.243 136.38 827.932 140.607C825.011 145.9 821.058 150.021 816.065 152.993C811.072 155.991 805.402 157.469 798.989 157.469C791.842 157.469 786.338 155.561 782.459 151.655C778.555 147.808 776.649 141.912 776.649 134.001V60.6771H753.408V139.352C753.408 146.668 754.993 153.158 758.211 158.831C761.405 164.479 765.903 168.93 771.713 172.117C777.523 175.313 784.233 176.923 791.842 176.923C801.663 176.923 810.42 174.437 818.078 169.417C823.921 165.627 828.493 160.738 832.042 154.975V174.685H855.283V60.6854H832.042H832.051Z"/></g>
+      <circle id="wmLight" cx="-1000" cy="-1000" r="330" fill="url(#wmGlow)" mask="url(#wmMask)"/>
+      <g transform="translate(0 240)"><rect x="80" y="207" width="1280" height="1" fill="#434962" fill-opacity=".38"/><text fill="#6A6D85" font-family="IBM Plex Mono" font-size="12" letter-spacing="0.12em" x="80" y="244">&#xa9; 2026 PROOFQUARRY</text><text fill="#6A6D85" font-family="IBM Plex Mono" font-size="12" letter-spacing="0.12em" x="258" y="244">DESIGN BY LIKA SAZONKINA</text><text fill="#6A6D85" font-family="IBM Plex Mono" font-size="12" letter-spacing="0.12em" x="1242" y="244">PRIVACY</text><text fill="#6A6D85" font-family="IBM Plex Mono" font-size="12" letter-spacing="0.12em" x="1318" y="244">TERMS</text></g>
+    </svg>
+  </div>
+  <details><summary>CSS + JS</summary><pre>&lt;!-- inside the footer SVG, over the wordmark (Role/Wordmark #282F46 at 50%) --&gt;
+&lt;radialGradient id="wmGlow"&gt;
+  &lt;stop offset="0"   stop-color="#C9C8D5" stop-opacity=".22"/&gt;
+  &lt;stop offset=".45" stop-color="#C9C8D5" stop-opacity=".08"/&gt;
+  &lt;stop offset="1"   stop-color="#C9C8D5" stop-opacity="0"/&gt;
+&lt;/radialGradient&gt;
+&lt;mask id="wmMask"&gt;&lt;!-- the wordmark paths, filled white --&gt;&lt;/mask&gt;
+&lt;circle id="wmLight" r="330" fill="url(#wmGlow)" mask="url(#wmMask)"/&gt;
+
+#wmLight { opacity:0; transition: opacity 400ms var(--ease); }
+footer:hover #wmLight { opacity:1; }
+/* JS: on mousemove convert the cursor to SVG coordinates and ease the circle toward it
+   (x += (target - x) * 0.1 per frame). Touch: no effect. Reduced motion: no easing. */</pre></details>
+</div></section>
+
+<section class="ex" id="search"><div class="wrap">
+  <div class="ex-head"><div><h2>Search field</h2><p>Hover: the border gets a touch lighter. Click or press “/”: focus, the border gets lighter again and the shortcut hint goes away. Type: ✕ appears to clear. Click outside: the query stays, the border settles.</p>
+    <div class="specs"><span>150 ms</span><span>border Hairline Strong → Text Faint → Text Muted</span><span>caret lime</span><span>“/” focuses the field</span></div></div></div>
+  <div class="stage" style="display:flex;flex-direction:column;gap:16px;align-items:flex-start">
+    <div class="state" id="sstateW"><span class="state-dot"></span><span id="sstate">Empty</span></div>
+    <label class="sfield" id="sfield"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4.75"/><path d="M10.5 10.5 13.5 13.5"/></svg>
+      <input id="sq" type="search" placeholder="Search posts" autocomplete="off" aria-label="Search posts"><span class="kbd" aria-hidden="true">/</span>
+      <button class="sclear" id="sclear" type="button" aria-label="Clear search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></label>
+  </div>
+  <details><summary>CSS + JS</summary><pre>.search { border:1px solid var(--hairline-strong); border-radius:8px; transition: border-color 150ms var(--ease); }
+.search:hover        { border-color: var(--fg-faint); }      /* #6A6D85 */
+.search:focus-within { border-color: var(--fg-muted); }      /* #9598AB, no glow */
+.search input { caret-color: var(--accent); }                /* lime caret */
+.search:focus-within .kbd, .search.has-value .kbd { opacity:0; }
+.search .clear { opacity:0; pointer-events:none; } .search.has-value .clear { opacity:1; pointer-events:auto; }
+/* JS: toggle .has-value on input; ✕ clears and keeps focus; "/" anywhere on the page focuses the field. */</pre></details>
+</div></section>
+
+<section class="ex" id="tooltip"><div class="wrap">
+  <div class="ex-head"><div><h2>Tooltip</h2><p>In the pricing table the ⓘ opens a short explanation: hover on desktop, tap on tablet and mobile.</p>
+    <div class="specs"><span>150 ms</span><span>rise 4 px</span><span>Shadow/Popover</span></div></div></div>
+  <div class="stage tip-stage">
+    <div class="tipwrap" id="tipwrap"><span style="color:var(--muted)">Public verification</span>
+      <button class="tipbtn" id="tipbtn" aria-label="What is public verification?"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><path d="M8 7v4.5M8 4.6v.4"/></svg></button>
+      <div class="tip" role="tooltip">Runs on the reader’s machine against the published root. There is nothing for us to meter.</div></div>
+  </div>
+  <details><summary>CSS</summary><pre>.tip { opacity:0; transform:translateY(4px); transition: opacity 150ms var(--ease), transform 150ms var(--ease);
+  box-shadow: 0 16px 40px rgba(0,0,0,.45); }                 /* Shadow/Popover */
+.has-tip:hover .tip, .has-tip.open .tip { opacity:1; transform:none; }   /* .open = tap */</pre></details>
+</div></section>
+
+<section class="inner" id="pages"><div class="wrap">
+  <div class="ex-head"><div><h2>Inner pages · Minimal background</h2><p>The same layer, quieter, behind every other page head. Each page has its own pattern.</p></div></div>
+  <div class="grid">
+    <div><div class="field head" data-preset="min" data-seed="23"><canvas aria-hidden="true"></canvas><span class="kicker">Pricing</span><h3>Same cryptography on every tier</h3></div><div class="cap"><span>Pricing</span><span>seed 23</span></div></div>
+    <div><div class="field head" data-preset="min" data-seed="61"><canvas aria-hidden="true"></canvas><span class="kicker">Security</span><h3>How ProofQuarry protects signing keys and the root of trust</h3></div><div class="cap"><span>Security</span><span>seed 61</span></div></div>
+    <div><div class="field head" data-preset="min" data-seed="37"><canvas aria-hidden="true"></canvas><span class="kicker">Company</span><h3>We can help solve trust in data on the Internet</h3></div><div class="cap"><span>Company</span><span>seed 37</span></div></div>
+    <div><div class="field head" data-preset="min" data-seed="43"><canvas aria-hidden="true"></canvas><span class="kicker">Docs</span><h3>Sign a file in four commands</h3></div><div class="cap"><span>Docs</span><span>seed 43</span></div></div>
+    <div><div class="field head" data-preset="min" data-seed="53"><canvas aria-hidden="true"></canvas><span class="kicker">News</span><h3>Release notes, and how signature verification works</h3></div><div class="cap"><span>News</span><span>seed 53</span></div></div>
+    <div><div class="field head" data-preset="min" data-seed="83"><canvas aria-hidden="true"></canvas><span class="kicker">404</span><h3>This page doesn’t exist</h3></div><div class="cap"><span>404</span><span>seed 83</span></div></div>
+  </div>
+  <details><summary>Background field · how it is built</summary><pre>WebGL fragment shader, 3D simplex noise (fbm, 3 octaves), drifting slowly.
+Palette: #0D121E #12202E #182C3A #2E4A44 #3E5C48 #506E4E
+Accents: olive #5C7A52 (Full) / #546E4C (Minimal), teal #2C5456 / #284E50
+Base: #080B12 (Full) / #0B0E16 (Minimal) · vignette #05070C · static grain
+Fades into #0E121C at the bottom of the head.
+Speed: uTime * 0.11 · paused off screen · still frame with prefers-reduced-motion.
+Seeds: Home 17 · Pricing 23 · Security 61 · Company 37 · Docs 43 · News 53 · Privacy 71 · Terms 75 · 404 83</pre></details>
+</div></section>
+
+<footer class="note"><div class="wrap">ProofQuarry motion guide · durations: 150 ms (interface), 700 ms (reveals) · curve cubic-bezier(.2, .7, .2, 1)</div></footer>
+</main>
+</div>
+
+<script>
+(function(){
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- background field (WebGL) ---------- */
+  var VERT='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+  var FRAG=[
+  'precision highp float;',
+  'uniform vec2 uRes;uniform float uTime;uniform float uSeed;uniform float uFull;uniform float uScale;',
+  'vec3 m289(vec3 x){return x-floor(x*(1./289.))*289.;}vec4 m289(vec4 x){return x-floor(x*(1./289.))*289.;}',
+  'vec4 perm(vec4 x){return m289(((x*34.)+1.)*x);}vec4 tis(vec4 r){return 1.79284291400159-.85373472095314*r;}',
+  'float sn(vec3 v){const vec2 C=vec2(1./6.,1./3.);const vec4 D=vec4(0.,.5,1.,2.);vec3 i=floor(v+dot(v,C.yyy));vec3 x0=v-i+dot(i,C.xxx);vec3 g=step(x0.yzx,x0.xyz);vec3 l=1.-g;vec3 i1=min(g.xyz,l.zxy);vec3 i2=max(g.xyz,l.zxy);vec3 x1=x0-i1+C.xxx;vec3 x2=x0-i2+C.yyy;vec3 x3=x0-D.yyy;i=m289(i);vec4 pp=perm(perm(perm(i.z+vec4(0.,i1.z,i2.z,1.))+i.y+vec4(0.,i1.y,i2.y,1.))+i.x+vec4(0.,i1.x,i2.x,1.));float n_=.142857142857;vec3 ns=n_*D.wyz-D.xzx;vec4 j=pp-49.*floor(pp*ns.z*ns.z);vec4 x_=floor(j*ns.z);vec4 y_=floor(j-7.*x_);vec4 x=x_*ns.x+ns.yyyy;vec4 y=y_*ns.x+ns.yyyy;vec4 h=1.-abs(x)-abs(y);vec4 b0=vec4(x.xy,y.xy);vec4 b1=vec4(x.zw,y.zw);vec4 s0=floor(b0)*2.+1.;vec4 s1=floor(b1)*2.+1.;vec4 sh=-step(h,vec4(0.));vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;vec3 p0=vec3(a0.xy,h.x);vec3 p1=vec3(a0.zw,h.y);vec3 p2=vec3(a1.xy,h.z);vec3 p3=vec3(a1.zw,h.w);vec4 nm=tis(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));p0*=nm.x;p1*=nm.y;p2*=nm.z;p3*=nm.w;vec4 m=max(.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.);m=m*m;return 42.*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));}',
+  'float fb(vec2 p,float t,float o){return .62*sn(vec3(p+o,t))+.28*sn(vec3(p*2.03+o*1.7,t*1.3))+.10*sn(vec3(p*4.1-o,t*1.7));}',
+  'vec3 hx(float r,float g,float b){return vec3(r,g,b)/255.;}',
+  'float hash(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}',
+  'void main(){',
+  ' vec2 uv=gl_FragCoord.xy/uRes;float asp=uRes.x/uRes.y;vec2 q=vec2(uv.x*asp,uv.y);',
+  ' float t=uTime*.11;float s=uSeed;vec2 p=gl_FragCoord.xy/uScale+vec2(t*.32,-t*.16);',
+  ' float full=uFull;float I=mix(.62,1.,full);',
+  ' vec3 col=mix(hx(11.,14.,22.),hx(8.,11.,18.),full);',
+  ' float f1=fb(p*.9,t,s*1.3)*.5+.5;float f2=fb(p*1.1,t*.9,s*2.1+7.)*.5+.5;float f3=fb(p*.8,t*1.1,s*3.7+13.)*.5+.5;float f4=fb(p*1.2,t*.8,s*5.3+21.)*.5+.5;float f5=fb(p*.7,t*1.2,s*7.1+33.)*.5+.5;',
+  ' col=mix(col,hx(13.,18.,30.),smoothstep(.30,.80,f1)*.9);',
+  ' col=mix(col,hx(18.,32.,46.),smoothstep(.38,.86,f2)*.85*I);',
+  ' col=mix(col,hx(24.,44.,58.),smoothstep(.45,.92,f3)*.8*I);',
+  ' col=mix(col,hx(46.,74.,68.),smoothstep(.55,.97,f4)*.7*I);',
+  ' col=mix(col,hx(62.,92.,72.),smoothstep(.62,1.0,f5)*.5*I);',
+  ' col=mix(col,hx(80.,110.,78.),smoothstep(.70,1.05,f1*f4*1.6)*.35*full);',
+  ' float h1=fract(sin(s*12.9898)*43758.5453);float h2=fract(sin(s*78.233)*24634.6345);',
+  ' vec2 co=vec2(mix(.86,.52+.43*h1,1.-full)*asp,mix(.82,.62+.33*h2,1.-full))+vec2(.16*asp,.12)*vec2(sin(t*1.1+s),cos(t*.9+s*.7));',
+  ' vec2 ct=vec2(mix(.08,.02+.36*h2,1.-full)*asp,mix(.62,.45+.4*h1,1.-full))+vec2(.14*asp,.12)*vec2(cos(t*.95+s*.4),sin(t*.8+s));',
+  ' float go=exp(-dot(q-co,q-co)/(mix(.10,.16,full)));float gt=exp(-dot(q-ct,q-ct)/(mix(.11,.18,full)));',
+  ' col=mix(col,mix(hx(84.,110.,76.),hx(92.,122.,82.),full),go*mix(.45,.8,full));',
+  ' col=mix(col,mix(hx(40.,78.,80.),hx(44.,84.,86.),full),gt*mix(.5,.85,full));',
+  ' vec2 dz=(q-vec2(.5*asp,.62))/vec2(.42*asp,.30);col=mix(col,hx(5.,7.,12.),exp(-dot(dz,dz)*1.6)*.55*full);',
+  ' vec2 vv=(uv-.5)*vec2(1.,1.15);float d=length(vv);col=mix(col,hx(5.,7.,12.),smoothstep(.35,.95,d)*mix(.35,.5,full));',
+  ' float fh=mix(.55,.35,full);float fa=1.-smoothstep(0.,fh,uv.y);fa=fa*fa*(3.-2.*fa);col=mix(col,hx(14.,18.,28.),fa);',
+  ' float g=hash(floor(gl_FragCoord.xy))-.5;col+=g*mix(.022,.03,full);',
+  ' gl_FragColor=vec4(col,1.);',
+  '}'].join('\n');
+
+  var paused=reduce, items=[], start=performance.now(), last=0;
+  function make(el){
+    var cv=el.querySelector('canvas'); var gl=cv&&cv.getContext('webgl',{antialias:false});
+    if(!gl){ el.classList.add('fallback'); if(cv) cv.remove(); return null; }
+    function sh(type,src){ var s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); return gl.getShaderParameter(s,gl.COMPILE_STATUS)?s:null; }
+    var vs=sh(gl.VERTEX_SHADER,VERT), fs=sh(gl.FRAGMENT_SHADER,FRAG); if(!vs||!fs){ el.classList.add('fallback'); cv.remove(); return null; }
+    var pr=gl.createProgram(); gl.attachShader(pr,vs); gl.attachShader(pr,fs); gl.linkProgram(pr); gl.useProgram(pr);
+    var b=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,b); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+    var loc=gl.getAttribLocation(pr,'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+    var it={el:el,cv:cv,gl:gl,u:{res:gl.getUniformLocation(pr,'uRes'),time:gl.getUniformLocation(pr,'uTime'),seed:gl.getUniformLocation(pr,'uSeed'),full:gl.getUniformLocation(pr,'uFull'),scale:gl.getUniformLocation(pr,'uScale')},seed:parseFloat(el.dataset.seed||'1'),full:el.dataset.preset==='full'?1:0,visible:true,dpr:1};
+    function size(){ var r=el.getBoundingClientRect(); var dpr=Math.min(window.devicePixelRatio||1,1.5)*0.75; it.dpr=dpr; cv.width=Math.max(1,Math.round(r.width*dpr)); cv.height=Math.max(1,Math.round(r.height*dpr)); gl.viewport(0,0,cv.width,cv.height); draw(it,last); }
+    if('ResizeObserver' in window) new ResizeObserver(size).observe(el); else window.addEventListener('resize',size);
+    if('IntersectionObserver' in window) new IntersectionObserver(function(e){ it.visible=e[0].isIntersecting; },{rootMargin:'100px'}).observe(el);
+    size(); return it;
+  }
+  function draw(it,t){ var gl=it.gl,u=it.u; gl.uniform2f(u.res,it.cv.width,it.cv.height); gl.uniform1f(u.time,t+it.seed*3.0); gl.uniform1f(u.seed,it.seed); gl.uniform1f(u.full,it.full); gl.uniform1f(u.scale,(it.full?820:680)*it.dpr); gl.drawArrays(gl.TRIANGLE_STRIP,0,4); }
+  document.querySelectorAll('.field').forEach(function(el){ var it=make(el); if(it) items.push(it); });
+  function loop(now){ if(!paused){ last=(now-start)/1000; for(var i=0;i<items.length;i++) if(items[i].visible) draw(items[i],last); } requestAnimationFrame(loop); }
+  requestAnimationFrame(loop);
+  var tbtn=document.getElementById('toggle'), tlab=document.getElementById('toggleLabel');
+  function sync(){ tbtn.setAttribute('aria-pressed',paused?'true':'false'); tlab.textContent=paused?'Play':'Pause'; tbtn.setAttribute('aria-label',paused?'Play backgrounds':'Pause backgrounds'); }
+  tbtn.addEventListener('click',function(){ if(paused) start=performance.now()-last*1000; paused=!paused; sync(); }); sync();
+
+  /* ---------- helpers ---------- */
+  function onceVisible(el,fn){ if(!('IntersectionObserver' in window)){ fn(); return; } var io=new IntersectionObserver(function(e){ if(e[0].isIntersecting){ io.disconnect(); fn(); } },{threshold:0,rootMargin:'0px 0px -20% 0px'}); io.observe(el); }
+  var timers={}; function clear(k){ (timers[k]||[]).forEach(clearTimeout); timers[k]=[]; } function later(k,fn,ms){ (timers[k]=timers[k]||[]).push(setTimeout(fn,reduce?0:ms)); }
+  function restart(el,cls){ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+
+  /* hero load */
+  var scene=document.getElementById('loadScene'), typer=document.getElementById('typer'), vtag=document.getElementById('vtag'), vchecks=[].slice.call(document.querySelectorAll('#vchecks div'));
+  var lines=['$ pq sign contract.pdf --save','hashing locally · sha256 8f2a1c9e4b7d…','signed → contract.pdf.pq.json'];
+  function playHero(){ clear('hero'); restart(scene,'in'); typer.textContent=''; vtag.className='tag'; vtag.innerHTML='<span class="spin"></span>Checking'; vchecks.forEach(function(c){ c.classList.remove('on'); });
+    if(reduce){ typer.textContent=lines.join('\n'); vtag.className='tag ok2'; vtag.textContent='✓ Verified'; vchecks.forEach(function(c){ c.classList.add('on'); }); return; }
+    var t=1200; lines.forEach(function(line,li){ for(var i=1;i<=line.length;i++){ (function(i){ later('hero',function(){ var done=lines.slice(0,li).join('\n'); typer.textContent=(done?done+'\n':'')+line.slice(0,i); },t); })(i); t+=28; } t+=260; });
+    later('hero',function(){ vtag.className='tag ok2'; vtag.textContent='✓ Verified'; },t+500);
+    vchecks.forEach(function(c,i){ later('hero',function(){ c.classList.add('on'); },t+700+i*250); }); }
+  onceVisible(scene,playHero,0.3);
+
+  /* timeline */
+  var tl=document.getElementById('tl'), nodes=[].slice.call(tl.querySelectorAll('.node'));
+  var tlLine=tl.querySelector('.line'), tlFill=tl.querySelector('.line i'), tlRaf=0;
+  function ease(k){ return k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2; }            /* ease-in-out: line and dots share it */
+  function playTl(){ cancelAnimationFrame(tlRaf); nodes.forEach(function(n){ n.classList.remove('lit'); }); tl.classList.add('in');
+    var L=tlLine.getBoundingClientRect(), at=nodes.map(function(n){ return Math.max(0,(n.getBoundingClientRect().left-L.left)/L.width); });
+    if(reduce){ tlFill.style.transform='scaleX(1)'; nodes.forEach(function(n){ n.classList.add('lit'); }); return; }
+    var D=2400, t0=performance.now();
+    (function frame(now){ var k=Math.min(1,(now-t0)/D), p=ease(k); tlFill.style.transform='scaleX('+p.toFixed(4)+')';
+      nodes.forEach(function(n,i){ if(p>=at[i]-0.002) n.classList.add('lit'); }); if(k<1) tlRaf=requestAnimationFrame(frame); })(t0); }
+  onceVisible(tl,playTl);
+
+  /* timeline, tablet + mobile: pinned, scroll-driven horizontal */
+  var ph=document.getElementById('ph2'), pin=document.getElementById('pin'), track=document.getElementById('track'), line=document.getElementById('tl2line'), fill=document.getElementById('tl2fill'), tnodes=[].slice.call(track.querySelectorAll('.node')), len=0, cur=0, target=0, raf=0;
+  function render(){ var F=Math.max(0,ph.clientWidth*0.55-24.5), reach=Math.min(len,cur*len+F);   /* focus point: 55% of the width */
+    track.style.transform='translate3d('+(-cur*len).toFixed(2)+'px,0,0)'; fill.style.setProperty('--fill',(len?reach/len:0).toFixed(4));
+    var W=ph.clientWidth, focus=W*0.55, step=len/(tnodes.length-1);
+    tnodes.forEach(function(n,i){ n.classList.toggle('lit',reach>=i*step-2);
+      var x=20+i*step-cur*len;                                  /* node's left edge on screen */
+      var q=Math.max(0,Math.min(1,(focus+W*0.45-x)/(W*0.45)));  /* 0 far right → 1 at the focus point */
+      var kids=n.children; for(var k=0;k<kids.length;k++){ var a=Math.max(0,Math.min(1,q*1.5-k*0.16)); a=a*a*(3-2*a);
+        kids[k].style.opacity=(0.08+0.92*a).toFixed(3); kids[k].style.transform='translate3d(0,'+((1-a)*12).toFixed(1)+'px,0)'; kids[k].style.filter=a<0.999?'blur('+((1-a)*6).toFixed(2)+'px)':'none'; } }); }
+  function loop(){ cur+= (target-cur)*0.14; if(Math.abs(target-cur)<0.0005) cur=target; render(); raf=(cur!==target)?requestAnimationFrame(loop):0; }
+  function onScroll2(){ target=len?Math.max(0,Math.min(1,(ph.scrollTop-pin.offsetTop)/len)):0; if(reduce){ cur=target; render(); return; } if(!raf) raf=requestAnimationFrame(loop); }
+  function measure(){ len=tnodes[tnodes.length-1].offsetLeft-tnodes[0].offsetLeft; line.style.width=len+'px'; pin.style.height=(ph.clientHeight+len)+'px'; onScroll2(); }
+  ph.addEventListener('scroll',onScroll2,{passive:true}); window.addEventListener('resize',measure); measure();
+
+  /* reveal */
+  var rg=document.getElementById('rgrid'); function playReveal(){ restart(rg,'in'); } onceVisible(rg,playReveal,0.3);
+
+  document.querySelectorAll('[data-replay]').forEach(function(b){ b.addEventListener('click',function(){ var k=b.dataset.replay; if(k==='hero-load') playHero(); if(k==='timeline') playTl(); if(k==='reveal') playReveal(); }); });
+
+  /* panel edge light */
+  var panels=[].slice.call(document.querySelectorAll('.panel')), ticking=false;
+  function edge(){ ticking=false; var vh=window.innerHeight; for(var i=0;i<panels.length;i++){ var r=panels[i].getBoundingClientRect(); if(r.bottom<-50||r.top>vh+50) continue; var p=Math.max(0,Math.min(1,(vh-r.top)/(vh+r.height))); panels[i].style.setProperty('--p',(reduce?0.2:(-0.15+p*1.3)).toFixed(3)); } }
+  function onScroll(){ if(!ticking){ ticking=true; requestAnimationFrame(edge); } }
+  window.addEventListener('scroll',onScroll,{passive:true}); window.addEventListener('resize',onScroll); edge();
+
+  /* copy button */
+  var cb=document.getElementById('copyBtn'), cl=document.getElementById('copyLabel');
+  cb.addEventListener('click',function(){ clear('copy'); cl.innerHTML='Copied <svg width="14" height="14" style="vertical-align:-2px"><use href="#check"/></svg>'; later('copy',function(){ cl.textContent='Copy commands'; },2000); });
+
+  /* header on scroll (inside the box) */
+  var sbox=document.getElementById('sbox'), shead=document.getElementById('shead'), hst=document.getElementById('hstate'), hsw=hst.parentNode, mh=sbox.querySelector('.minihead');
+  function hsync(){ var on=sbox.scrollTop>mh.offsetHeight-60-8; shead.classList.toggle('scrolled',on); hsw.classList.toggle('on',on); hst.textContent=on?'Scrolled · dark fill + line':'Top · transparent'; }
+  sbox.addEventListener('scroll',hsync,{passive:true}); hsync();
+  var hplay=null; document.getElementById('playHeader').addEventListener('click',function(){ cancelAnimationFrame(hplay); var max=sbox.scrollHeight-sbox.clientHeight, t0=performance.now(), D=2600;
+    function step(now){ var k=Math.min(1,(now-t0)/D); var e=k<.5?(k/.5):(1-(k-.5)/.5); e=e*e*(3-2*e); sbox.scrollTop=max*e; if(k<1) hplay=requestAnimationFrame(step); }
+    if(reduce){ sbox.scrollTop=max; return; } hplay=requestAnimationFrame(step); });
+
+  /* menu */
+  var phone=document.getElementById('phone'), burger=document.getElementById('burger');
+  burger.addEventListener('click',function(){ var o=phone.classList.toggle('open'); burger.setAttribute('aria-expanded',o?'true':'false'); burger.setAttribute('aria-label',o?'Close menu':'Open menu'); });
+
+  /* modal */
+  var bd=document.getElementById('backdrop'); function openM(){ bd.classList.add('open'); bd.setAttribute('aria-hidden','false'); document.getElementById('closeModal').focus(); } function closeM(){ bd.classList.remove('open'); bd.setAttribute('aria-hidden','true'); }
+  document.getElementById('openModal').addEventListener('click',openM); document.getElementById('closeModal').addEventListener('click',closeM);
+  bd.addEventListener('click',function(e){ if(e.target===bd) closeM(); }); document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeM(); });
+
+  /* demo links: no jump, no stuck focus */
+  document.querySelectorAll('.dlinks a,.dlogin').forEach(function(a){ a.addEventListener('click',function(e){ e.preventDefault(); a.blur(); }); });
+  document.querySelectorAll('a.btn').forEach(function(a){ a.addEventListener('click',function(e){ e.preventDefault(); a.blur(); if(a.getAttribute('href')==='#modal'){ document.getElementById('modal').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'}); } }); });
+  document.querySelectorAll('button.btn').forEach(function(b){ b.addEventListener('mouseup',function(){ b.blur(); }); });
+
+
+  /* side menu: highlight the section in view */
+  var links=[].slice.call(document.querySelectorAll('.side-nav a')), map={}; links.forEach(function(a){ map[a.getAttribute('href').slice(1)]=a; });
+  if('IntersectionObserver' in window){ var spy=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ links.forEach(function(a){ a.removeAttribute('aria-current'); }); var a=map[e.target.id]; if(a){ a.setAttribute('aria-current','true'); if(window.innerWidth<=900) a.scrollIntoView({block:'nearest',inline:'center'}); } } }); },{rootMargin:'-35% 0px -60% 0px'});
+    Object.keys(map).forEach(function(id){ var el=document.getElementById(id); if(el) spy.observe(el); }); }
+
+
+
+  /* footer wordmark: soft light follows the cursor inside the letters (footer exported from Figma) */
+  var fsvg=document.getElementById('ftrSvg'), wl=document.getElementById('wmLight'), gx=-1000, gy=-1000, tx=-1000, ty=-1000, graf=0;
+  function toSvg(e){ var pt=fsvg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; return pt.matrixTransform(fsvg.getScreenCTM().inverse()); }
+  function gstep(){ var k=reduce?1:0.1; gx+=(tx-gx)*k; gy+=(ty-gy)*k; wl.setAttribute('cx',gx.toFixed(1)); wl.setAttribute('cy',gy.toFixed(1)); graf=(Math.abs(tx-gx)>0.3||Math.abs(ty-gy)>0.3)?requestAnimationFrame(gstep):0; }
+  fsvg.addEventListener('mouseenter',function(e){ var p=toSvg(e); gx=tx=p.x; gy=ty=p.y; wl.setAttribute('cx',gx); wl.setAttribute('cy',gy); });
+  fsvg.addEventListener('mousemove',function(e){ var p=toSvg(e); tx=p.x; ty=p.y; if(!graf) graf=requestAnimationFrame(gstep); });
+
+  /* search field */
+  var sf=document.getElementById('sfield'), sq=document.getElementById('sq'), sstate=document.getElementById('sstate'), sw=document.getElementById('sstateW'), hov=false;
+  function ssync(){ var has=sq.value.length>0, foc=document.activeElement===sq; sf.classList.toggle('has',has); sstate.textContent=foc?'Focus':(has?'Filled':(hov?'Hover':'Empty')); sw.classList.toggle('on',foc); }
+  sq.addEventListener('input',ssync); sq.addEventListener('focus',ssync); sq.addEventListener('blur',ssync);
+  sf.addEventListener('mouseenter',function(){ hov=true; ssync(); }); sf.addEventListener('mouseleave',function(){ hov=false; ssync(); });
+  document.getElementById('sclear').addEventListener('click',function(e){ e.preventDefault(); sq.value=''; sq.focus(); ssync(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='/'&&document.activeElement.tagName!=='INPUT'&&document.activeElement.tagName!=='TEXTAREA'){ e.preventDefault(); sq.focus(); } });
+  ssync();
+
+  /* tooltip: tap toggles */
+  var tw=document.getElementById('tipwrap'); document.getElementById('tipbtn').addEventListener('click',function(){ tw.classList.toggle('open'); });
+})();
+</script>
